@@ -18,6 +18,7 @@ package org.apache.spark.sql
 
 import org.apache.spark.sql.execution.datasources.oap.OapStrategies
 import org.apache.spark.sql.internal.SQLConf
+import org.apache.spark.sql.internal.oap.OapConf
 
 object OapStrategySuite extends OapTestSuite with OapSQLConfConfigSet with OapStrategies {
 
@@ -81,7 +82,7 @@ object OapStrategySuite extends OapTestSuite with OapSQLConfConfigSet with OapSt
   private def setRunningParams(): Boolean = {
     val conf = activeConf
     if (conf.getBenchmarkConf(BenchmarkConfig.INDEX_ENABLE) == "false") {
-      spark.sqlContext.conf.setConf(SQLConf.OAP_ENABLE_OINDEX, false)
+      spark.sqlContext.conf.setConf(OapConf.OAP_ENABLE_OINDEX, false)
     }
 
     conf.allSqlOptions().foreach{ setting =>
@@ -112,7 +113,7 @@ object OapStrategySuite extends OapTestSuite with OapSQLConfConfigSet with OapSt
     OapBenchmarkTest("Limit 10 from whole table",
       s"SELECT * FROM $table WHERE $btreeIndexAttr > 0 ORDER BY $btreeIndexAttr LIMIT 10"),
     OapBenchmarkTest("Limit 10 in range [3000, 20000]",
-      s"SELECT * FROM $table WHERE $btreeIndexAttr BETWEEN 3000 AND 20000 ORDER BY $btreeIndexAttr LIMIT 10"),
+      s"SELECT * FROM $table WHERE $btreeIndexAttr BETWEEN 0 AND 20000 ORDER BY $btreeIndexAttr LIMIT 10"),
 
     // Semi join
     // TODO: add semi join test case.

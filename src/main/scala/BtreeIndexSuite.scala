@@ -17,6 +17,7 @@
 package org.apache.spark.sql
 
 import org.apache.spark.sql.internal.SQLConf
+import org.apache.spark.sql.internal.oap.OapConf
 
 object BtreeIndexSuite extends OapTestSuite with OapPerfContext with OapFileFormatConfigSet {
   override protected def getAppName: String = "BtreeIndexBenchmarkSuite"
@@ -62,7 +63,7 @@ object BtreeIndexSuite extends OapTestSuite with OapPerfContext with OapFileForm
   private def setRunningParams(): Boolean = {
     val conf = activeConf
     if (conf.getBenchmarkConf(BenchmarkConfig.INDEX_ENABLE) == "false"){
-      spark.sqlContext.conf.setConf(SQLConf.OAP_ENABLE_OINDEX, false)
+      spark.sqlContext.conf.setConf(OapConf.OAP_ENABLE_OINDEX, false)
     }
 
     true
