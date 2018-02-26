@@ -150,6 +150,6 @@ trait OapSQLConfConfigSet extends BenchmarkConfigSelector{
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
       .setSqlConf("spark.sql.oap.oindex.eis.enabled", "true")
       .setSqlConf("spark.sql.oap.oindex.file.policy", "true")
-      .setSqlConf("spark.sql.oap.oindex.statistics.policy", "false")
+      .setSqlConf("spark.sql.oap.oindex.statistics.policy", "true")
   )
 }
