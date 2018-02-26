@@ -43,7 +43,7 @@ object BitmapIndexSuite extends OapTestSuite with OapFileFormatConfigSet {
       spark.sqlContext.sql(s"USE $databaseName")
       true
     } else {
-      println(s"ERROR: $databaseName does not exist!")
+      sys.error(s"ERROR: $databaseName does not exist!")
       false
     }
   }
@@ -56,14 +56,14 @@ object BitmapIndexSuite extends OapTestSuite with OapFileFormatConfigSet {
               .collect().exists(_.getString(3) == attr)) {
           true
         } else {
-          println(s"ERROR: index on $attr does not exist!")
+          sys.error(s"ERROR: index on $attr does not exist!")
           false
         }
       } else {
         true
       }
     } else {
-      println(s"ERROR: table $table does not exist!")
+      sys.error(s"ERROR: table $table does not exist!")
       false
     }
   }

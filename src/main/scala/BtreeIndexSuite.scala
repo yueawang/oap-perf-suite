@@ -72,7 +72,7 @@ object BtreeIndexSuite extends OapTestSuite with OapPerfContext with OapFileForm
     if (isDataReady()) {
       setRunningParams()
     } else {
-      println("ERROR: Data is not ready!")
+      sys.error("ERROR: Data is not ready!")
       false
     }
   }

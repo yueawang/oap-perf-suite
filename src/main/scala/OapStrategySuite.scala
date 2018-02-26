@@ -45,7 +45,7 @@ object OapStrategySuite extends OapTestSuite with OapSQLConfConfigSet with OapSt
       spark.sqlContext.sql(s"USE $databaseName")
       true
     } else {
-      println(s"ERROR: $databaseName does not exist!")
+      sys.error(s"ERROR: $databaseName does not exist!")
       false
     }
   }
@@ -60,18 +60,18 @@ object OapStrategySuite extends OapTestSuite with OapSQLConfConfigSet with OapSt
             .collect().exists(_.getString(3) == bitmapIndexAttr)) {
             true
           } else {
-            println(s"ERROR: index on $bitmapIndexAttr does not exist!")
+            sys.error(s"ERROR: index on $bitmapIndexAttr does not exist!")
             false
           }
         } else {
-          println(s"ERROR: index on $btreeIndexAttr does not exist!")
+          sys.error(s"ERROR: index on $btreeIndexAttr does not exist!")
           false
         }
       } else {
         true
       }
     } else {
-      println(s"ERROR: table $table does not exist!")
+      sys.error(s"ERROR: table $table does not exist!")
       false
     }
   }

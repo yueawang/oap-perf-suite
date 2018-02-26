@@ -54,6 +54,7 @@ object OapBenchmark extends Logging {
         |   * -p Profile (Full, BigData, SmallData, etc.):
         |   * -s SuiteName (All, etc.):
         |   * -t TestName (All, etc.):
+        |   * -d Datagen: build data for all test.
         |   * -r Repeat(3):
         |   * -bootstrapping: self test without cluster support.
         |   */
@@ -65,6 +66,7 @@ object OapBenchmark extends Logging {
    * -p Profile (Full, BigData, SmallData, etc.):
    * -s SuiteName (All, etc.):
    * -t TestName (All, etc.):
+   * -d Datagen: gen data for test.
    * -r Repeat(3):
    * -b bootstrapping: self test without cluster support.
    * TODO: -Dkey.conf=value

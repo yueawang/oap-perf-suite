@@ -42,14 +42,6 @@ abstract class OapTestSuite extends BenchmarkConfigSelector with OapPerfContext 
 
   def allTests(): Seq[OapBenchmarkTest] = testSet
 
-  def generateReport(saveToFile: String): Unit = {
-    if (saveToFile.isEmpty) {
-      println("HAHA")
-    } else {
-      println(s"Write to File $saveToFile")
-    }
-  }
-
   def runAll(repCount: Int): Unit = {
     testSet.foreach{
       run(_, repCount)
@@ -68,9 +60,9 @@ abstract class OapTestSuite extends BenchmarkConfigSelector with OapPerfContext 
       TestUtil.queryTime(spark.sql(test.sql).foreach{ _ => })
     }.toArray
 
-    val prev: Seq[(String, Array[Int])] = resultMap.getOrElse(test.name, Nil)
+    val prev: Seq[(String, Array[Int])] = _resultMap.getOrElse(test.name, Nil)
     val curr = prev :+ (activeConf.toString, result)
-    resultMap.put(test.name, curr)
+    _resultMap.put(test.name, curr)
   }
 
   private var _activeConf: Option[BenchmarkConfig] = None
@@ -112,20 +104,22 @@ abstract class OapTestSuite extends BenchmarkConfigSelector with OapPerfContext 
    *                            (config2, (1, 2, 3, ...))),
    *              ...)
    */
-  val resultMap: mutable.LinkedHashMap[String, Seq[(String, Array[Int])]] =
+  private val _resultMap: mutable.LinkedHashMap[String, Seq[(String, Array[Int])]] =
     new mutable.LinkedHashMap[String, Seq[(String, Array[Int])]]
+
+  def resultMap = _resultMap
 
   protected def testSet: Seq[OapBenchmarkTest]
 
 }
 
-object BenchmarkSuiteSelector {
+object BenchmarkSuiteSelector extends Logging{
 
   private val allRegisterSuites = new ArrayBuffer[OapTestSuite]()
 
   def registerSuite(suite: OapTestSuite) = {
     allRegisterSuites.append(suite)
-    println(s"Register $suite")
+    logWarning(s"Register $suite")
   }
 
   def allSuites: Seq[OapTestSuite] = allRegisterSuites
