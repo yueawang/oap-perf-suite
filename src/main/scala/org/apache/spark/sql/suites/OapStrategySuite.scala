@@ -16,11 +16,11 @@
  */
 package org.apache.spark.sql.suites
 
-import org.apache.spark.sql.{BenchmarkConfig, OapBenchmarkTest, OapStrategyConfigSet, OapTestSuite}
+import org.apache.spark.sql.{BenchmarkConfig, OapStrategyConfigSet, OapTestSuite}
 import org.apache.spark.sql.execution.datasources.oap.OapStrategies
 import org.apache.spark.sql.internal.oap.OapConf
 
-object OapStrategy$Suite$ extends OapTestSuite with OapStrategyConfigSet with OapStrategies {
+object OapStrategySuite extends OapTestSuite with OapStrategyConfigSet with OapStrategies {
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -105,25 +105,25 @@ object OapStrategy$Suite$ extends OapTestSuite with OapStrategyConfigSet with Oa
   val leftTable = "store_sales_dup"
   val btreeIndexAttr = "ss_ticket_number"
   val bitmapIndexAttr = "ss_item_sk1"
-  val lsRange = (1 to 10).mkString(",")
-  val msRange = (1 to 5).mkString(",")
+  val range1to10 = (1 to 10).mkString(",")
+  val range1to5 = (1 to 5).mkString(",")
 
   override def testSet: Seq[OapBenchmarkTest] = Seq(
     // Order by limit
     OapBenchmarkTest("Limit 10 from whole table",
       s"SELECT * FROM $table WHERE $btreeIndexAttr > 0 ORDER BY $btreeIndexAttr LIMIT 10"),
-    OapBenchmarkTest("Limit 10 in range [3000, 20000]",
+    OapBenchmarkTest("Limit 10 in range [0, 20000]",
       s"SELECT * FROM $table WHERE $btreeIndexAttr BETWEEN 0 AND 20000 ORDER BY $btreeIndexAttr LIMIT 10"),
 
     // Semi join
     // TODO: add semi join test case.
 
     // Aggregation
-    OapBenchmarkTest("Aggregation on bitmap index",
+    OapBenchmarkTest("Aggregation on bitmap index in range1to5",
        s"SELECT $bitmapIndexAttr, max(${btreeIndexAttr}) FROM $table " +
-            s"WHERE $bitmapIndexAttr IN ( $msRange ) " +
+            s"WHERE $bitmapIndexAttr IN ( $range1to5 ) " +
             s"GROUP BY $bitmapIndexAttr"),
-    OapBenchmarkTest("Aggregation on btree index",
+    OapBenchmarkTest("Aggregation on btree index where btreeIndexAtrr < 1000000",
       s"SELECT $btreeIndexAttr, max(${bitmapIndexAttr}) FROM $table " +
         s"WHERE $btreeIndexAttr < 1000000 " +
         s"GROUP BY $btreeIndexAttr")

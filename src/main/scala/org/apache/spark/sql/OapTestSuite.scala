@@ -25,13 +25,14 @@ import org.apache.spark.internal.Logging
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-case class OapBenchmarkTest(_name: String, _sentence: String, _profile: String = "Benchmark") {
-  def name = _name
-  def sql = _sentence
-  def profile = _profile
-}
-
 abstract class OapTestSuite extends BenchmarkConfigSelector with OapPerfSuiteContext with Logging {
+
+  // Class information
+  case class OapBenchmarkTest(_name: String, _sentence: String, _profile: String = "Benchmark") {
+    def name = _name
+    def sql = _sentence
+    def profile = _profile
+  }
 
   def activeConf: BenchmarkConfig = {
     if (_activeConf.isEmpty) {

@@ -16,7 +16,7 @@
  */
 package org.apache.spark.sql.suites
 
-import org.apache.spark.sql.{BenchmarkConfig, OapBenchmarkTest, ParquetVsOapConfigSet, OapTestSuite}
+import org.apache.spark.sql.{BenchmarkConfig, ParquetVsOapConfigSet, OapTestSuite}
 import org.apache.spark.sql.internal.oap.OapConf
 
 object BitmapIndexSuite extends OapTestSuite with ParquetVsOapConfigSet {
