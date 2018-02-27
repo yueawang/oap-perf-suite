@@ -116,14 +116,14 @@ abstract class OapTestSuite extends BenchmarkConfigSelector with OapPerfSuiteCon
 
 object BenchmarkSuiteSelector extends Logging{
 
-  private val allRegisterSuites = new ArrayBuffer[OapTestSuite]()
+  private val allRegisterSuites = new mutable.HashMap[String, OapTestSuite]()
 
   def registerSuite(suite: OapTestSuite) = {
-    allRegisterSuites.append(suite)
+    allRegisterSuites(suite.getClass.getCanonicalName) = suite
     logWarning(s"Register $suite")
   }
 
-  def allSuites: Seq[OapTestSuite] = allRegisterSuites
+  def allSuites: Seq[OapTestSuite] = allRegisterSuites.values.toSeq
 
   var wildcardSuite: Option[String] = None
 
@@ -131,8 +131,12 @@ object BenchmarkSuiteSelector extends Logging{
 
   // TODO: regex support
   def selectedSuites(): Seq[OapTestSuite] = wildcardSuite match {
-    case Some(name) =>allRegisterSuites.filter(_.toString.contains(name))
-    case None => allRegisterSuites
+    case Some(name) =>name.split(";").map{ suite =>
+      allRegisterSuites.get(suite) match {
+        case Some(suite) => suite
+      }
+    }
+    case None => allRegisterSuites.values.toSeq
   }
 }
 
