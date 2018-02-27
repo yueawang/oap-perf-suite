@@ -27,7 +27,7 @@ import org.reflections.Reflections
 
 import scala.collection.mutable
 
-object OapBenchmark extends Logging {
+object OapPerfSuite extends Logging {
 
   // register all suite
   {

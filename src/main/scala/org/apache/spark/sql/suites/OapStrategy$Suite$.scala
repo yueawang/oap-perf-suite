@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.spark.sql
+package org.apache.spark.sql.suites
 
+import org.apache.spark.sql.{BenchmarkConfig, OapBenchmarkTest, OapStrategyConfigSet, OapTestSuite}
 import org.apache.spark.sql.execution.datasources.oap.OapStrategies
-import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.internal.oap.OapConf
 
-object OapStrategySuite extends OapTestSuite with OapSQLConfConfigSet with OapStrategies {
+object OapStrategy$Suite$ extends OapTestSuite with OapStrategyConfigSet with OapStrategies {
 
   override def beforeAll(): Unit = {
     super.beforeAll()

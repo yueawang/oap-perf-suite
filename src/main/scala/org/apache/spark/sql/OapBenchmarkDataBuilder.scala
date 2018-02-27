@@ -26,7 +26,7 @@ import org.apache.spark.util.Utils
 
 import scala.collection.mutable
 
-object OapBenchmarkDataBuilder extends OapPerfContext {
+object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
 
   private val defaultProperties = Map(
     "oap.benchmark.compression.codec"     -> "gzip",

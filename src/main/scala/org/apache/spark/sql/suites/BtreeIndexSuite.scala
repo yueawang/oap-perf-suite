@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.spark.sql
+package org.apache.spark.sql.suites
 
-import org.apache.spark.sql.internal.SQLConf
+import org.apache.spark.sql._
 import org.apache.spark.sql.internal.oap.OapConf
 
-object BtreeIndexSuite extends OapTestSuite with OapPerfContext with OapFileFormatConfigSet {
+object BtreeIndexSuite extends OapTestSuite with OapPerfSuiteContext with ParquetVsOapConfigSet {
   override protected def getAppName: String = "BtreeIndexBenchmarkSuite"
 
   val table = "store_sales"

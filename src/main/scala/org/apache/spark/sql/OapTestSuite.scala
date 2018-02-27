@@ -31,7 +31,7 @@ case class OapBenchmarkTest(_name: String, _sentence: String, _profile: String =
   def profile = _profile
 }
 
-abstract class OapTestSuite extends BenchmarkConfigSelector with OapPerfContext with Logging {
+abstract class OapTestSuite extends BenchmarkConfigSelector with OapPerfSuiteContext with Logging {
 
   def activeConf: BenchmarkConfig = {
     if (_activeConf.isEmpty) {

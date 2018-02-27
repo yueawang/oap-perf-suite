@@ -14,11 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.spark.sql
+package org.apache.spark.sql.suites
 
+import org.apache.spark.sql._
 import org.apache.spark.util.Utils
 
-object LocalSparkMasterTestSuite extends OapTestSuite with OapFileFormatParquetConfigSet {
+object LocalSparkMasterTestSuite extends OapTestSuite with ParquetOnlyConfigSet {
 
   protected object testImplicits extends SQLImplicits {
     protected override def _sqlContext: SQLContext = spark.sqlContext

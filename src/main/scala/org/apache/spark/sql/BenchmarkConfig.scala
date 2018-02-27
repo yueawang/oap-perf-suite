@@ -78,7 +78,6 @@ object BenchmarkConfig {
 abstract class BenchmarkConfigSelector {
   // TODO: choose conf
   def allConfigurations: Seq[BenchmarkConfig]
-
 }
 
 object BenchmarkConfigSelector {
@@ -100,7 +99,7 @@ object BenchmarkConfigSelector {
   }
 }
 
-trait OapFileFormatParquetConfigSet extends BenchmarkConfigSelector{
+trait ParquetOnlyConfigSet extends BenchmarkConfigSelector{
   // TODO: choose conf
   def allConfigurations: Seq[BenchmarkConfig] = Seq(
     new BenchmarkConfig()
@@ -112,7 +111,7 @@ trait OapFileFormatParquetConfigSet extends BenchmarkConfigSelector{
   )
 }
 
-trait OapFileFormatConfigSet extends BenchmarkConfigSelector{
+trait ParquetVsOapConfigSet extends BenchmarkConfigSelector{
   // TODO: choose conf
   def allConfigurations: Seq[BenchmarkConfig] = Seq(
     new BenchmarkConfig()
@@ -130,7 +129,7 @@ trait OapFileFormatConfigSet extends BenchmarkConfigSelector{
   )
 }
 
-trait OapSQLConfConfigSet extends BenchmarkConfigSelector{
+trait OapStrategyConfigSet extends BenchmarkConfigSelector{
   // TODO: choose conf
   def allConfigurations: Seq[BenchmarkConfig] = Seq(
     new BenchmarkConfig()

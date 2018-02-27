@@ -24,7 +24,7 @@ import sys.process._
 
 import org.apache.spark._
 
-trait OapPerfContext {
+trait OapPerfSuiteContext {
 
   protected val sparkConf = new SparkConf()
 
