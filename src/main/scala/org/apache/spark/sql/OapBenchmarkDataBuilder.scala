@@ -30,7 +30,7 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
 
   private val defaultProperties = Map(
     "oap.benchmark.compression.codec"     -> "gzip",
-    "oap.benchmark.support.oap.version"   -> "0.3.0",
+    "oap.benchmark.support.oap.version"   -> "0.4.0",
     "oap.benchmark.tpcds.tool.dir"        -> "/home/oap/tpcds-kit/tools",
     "oap.benchmark.hdfs.file.root.dir"    -> "/user/oap/oaptest/",
     "oap.benchmark.tpcds.data.scale"      -> "200",
