@@ -1,4 +1,4 @@
-name := "oap-perf"
+name := "oap-perf-suite"
 
 version := "1.0"
 
