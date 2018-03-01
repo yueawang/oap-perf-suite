@@ -82,39 +82,39 @@ object BtreeIndexSuite extends OapTestSuite with OapPerfSuiteContext with Parque
    * (name, sql sentence, TODO: profile, etc)
    */
   override def testSet = Seq(
-    OapBenchmarkTest("$attr < ${Int.MaxValue}",
+    OapBenchmarkTest("attr < ${Int.MaxValue}",
       s"SELECT * FROM $table WHERE $attr < ${Int.MaxValue}"),
-    OapBenchmarkTest("$attr < 2000000",
+    OapBenchmarkTest("attr < 2000000",
       s"SELECT * FROM $table WHERE $attr < 2000000"),
-    OapBenchmarkTest("$attr < 100000",
+    OapBenchmarkTest("attr < 100000",
       s"SELECT * FROM $table WHERE $attr < 100000"),
-    OapBenchmarkTest("$attr < 10000",
+    OapBenchmarkTest("attr < 10000",
       s"SELECT * FROM $table WHERE $attr < 10000"),
-    OapBenchmarkTest("$attr = 6000000",
+    OapBenchmarkTest("attr = 6000000",
       s"SELECT * FROM $table WHERE $attr = 6000000"),
-    OapBenchmarkTest("$attr BETWEEN 100 AND 200",
+    OapBenchmarkTest("attr BETWEEN 100 AND 200",
       s"SELECT * FROM $table WHERE $attr BETWEEN 100 AND 200"),
-    OapBenchmarkTest("$attr BETWEEN 100 AND 400",
+    OapBenchmarkTest("attr BETWEEN 100 AND 400",
       s"SELECT * FROM $table WHERE $attr BETWEEN 100 AND 400"),
-    OapBenchmarkTest("$attr BETWEEN 100 AND 800",
+    OapBenchmarkTest("attr BETWEEN 100 AND 800",
       s"SELECT * FROM $table WHERE $attr BETWEEN 100 AND 800"),
     
     // Two columns query
-    OapBenchmarkTest("$attr < 2000000 AND ss_customer_sk >= 120000",
+    OapBenchmarkTest("attr < 2000000 AND ss_customer_sk >= 120000",
       s"SELECT * FROM $table WHERE $attr < 2000000 AND ss_customer_sk >= 120000"),
-    OapBenchmarkTest("$attr < 100000 AND ss_list_price < 100.0",
+    OapBenchmarkTest("attr < 100000 AND ss_list_price < 100.0",
       s"SELECT * FROM $table WHERE $attr < 100000 AND ss_list_price < 100.0"),
-    OapBenchmarkTest("$attr < 10000 AND ss_net_paid < 200.0",
+    OapBenchmarkTest("attr < 10000 AND ss_net_paid < 200.0",
       s"SELECT * FROM $table WHERE $attr < 10000 AND ss_net_paid > 100.0 AND ss_net_paid < 200.0"),
-    OapBenchmarkTest("$attr < 10000 And ss_net_paid in [100.0, 110.0]",
+    OapBenchmarkTest("attr < 10000 And ss_net_paid in [100.0, 110.0]",
       s"SELECT * FROM $table WHERE $attr < 10000 AND ss_net_paid BETWEEN 100.0 AND 110.0"),
 
     // Three columns query
-    OapBenchmarkTest("$attr < 2000000 AND ss_customer_sk >= 120000 AND ss_list_price < 100.0",
+    OapBenchmarkTest("attr < 2000000 AND ss_customer_sk >= 120000 AND ss_list_price < 100.0",
       s"SELECT * FROM $table WHERE $attr < 2000000 AND ss_customer_sk >= 120000 AND ss_list_price < 100.0"),
-    OapBenchmarkTest("$attr < 100000 AND ss_list_price < 100.0 AND ss_net_paid > 500.0",
+    OapBenchmarkTest("attr < 100000 AND ss_list_price < 100.0 AND ss_net_paid > 500.0",
       s"SELECT * FROM $table WHERE $attr < 100000 AND ss_list_price < 100.0 AND ss_net_paid > 500.0"),
-    OapBenchmarkTest("$attr < 10000 AND AND ss_net_paid > 100.0 AND ss_net_paid < 110.0 AND ss_list_price < 100.0",
+    OapBenchmarkTest("attr < 10000 AND AND ss_net_paid > 100.0 AND ss_net_paid < 110.0 AND ss_list_price < 100.0",
       s"SELECT * FROM $table WHERE $attr < 10000 AND ss_net_paid > 100.0 AND ss_net_paid < 110.0 AND ss_list_price < 100.0")
   )
 }

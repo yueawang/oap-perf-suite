@@ -93,29 +93,29 @@ object BitmapIndexSuite extends OapTestSuite with ParquetVsOapConfigSet {
    * (name, sql sentence, TODO: profile, etc)
    */
   override def testSet = Seq(
-    OapBenchmarkTest("$attr in ( $lsRange )",
+    OapBenchmarkTest("attr in ( $lsRange )",
       s"SELECT * FROM $table WHERE $attr in ( $lsRange )"),
-    OapBenchmarkTest("$attr in ( $msRange )",
+    OapBenchmarkTest("attr in ( $msRange )",
       s"SELECT * FROM $table WHERE $attr in ( $msRange )"),
-    OapBenchmarkTest("$attr = 10",
+    OapBenchmarkTest("attr = 10",
       s"SELECT * FROM $table WHERE $attr = 10"),
-    OapBenchmarkTest("$attr = 25",
+    OapBenchmarkTest("attr = 25",
       s"SELECT * FROM $table WHERE $attr = 25"),
     // Two columns query
-    OapBenchmarkTest("$attr in ( $lsRange ) AND ss_customer_sk >= 120000",
+    OapBenchmarkTest("attr in ( $lsRange ) AND ss_customer_sk >= 120000",
       s"SELECT * FROM $table WHERE $attr in ( $lsRange ) AND ss_customer_sk >= 120000"),
-    OapBenchmarkTest("$attr in ( $msRange ) AND ss_list_price < 100.0",
+    OapBenchmarkTest("attr in ( $msRange ) AND ss_list_price < 100.0",
       s"SELECT * FROM $table WHERE $attr in ( $msRange ) AND ss_list_price < 100.0"),
-    OapBenchmarkTest("$attr = 10 AND ss_net_paid > 100.0 AND ss_net_paid < 200.0",
+    OapBenchmarkTest("attr = 10 AND ss_net_paid > 100.0 AND ss_net_paid < 200.0",
       s"SELECT * FROM $table WHERE $attr = 10 AND ss_net_paid > 100.0 AND ss_net_paid < 200.0"),
-    OapBenchmarkTest("$attr = 25 AND ss_net_paid > 100.0 AND ss_net_paid < 200.0",
+    OapBenchmarkTest("attr = 25 AND ss_net_paid > 100.0 AND ss_net_paid < 200.0",
       s"SELECT * FROM $table WHERE $attr = 25 AND ss_net_paid > 100.0 AND ss_net_paid < 200.0"),
     // Three columns query
-    OapBenchmarkTest("$attr in ( $lsRange ) AND ss_customer_sk >= 120000 AND ss_list_price < 100.0",
+    OapBenchmarkTest("attr in ( $lsRange ) AND ss_customer_sk >= 120000 AND ss_list_price < 100.0",
       s"SELECT * FROM $table WHERE $attr in ( $lsRange ) AND ss_customer_sk >= 120000 AND ss_list_price < 100.0"),
-    OapBenchmarkTest("$attr in ( $msRange ) AND ss_list_price < 100.0 AND ss_net_paid > 500.0",
+    OapBenchmarkTest("attr in ( $msRange ) AND ss_list_price < 100.0 AND ss_net_paid > 500.0",
       s"SELECT * FROM $table WHERE $attr in ( $msRange ) AND ss_list_price < 100.0 AND ss_net_paid > 500.0"),
-    OapBenchmarkTest("$attr = 10 AND ss_net_paid > 100.0 AND ss_net_paid < 200.0 AND ss_list_price < 100.0",
+    OapBenchmarkTest("attr = 10 AND ss_net_paid > 100.0 AND ss_net_paid < 200.0 AND ss_list_price < 100.0",
       s"SELECT * FROM $table WHERE $attr = 10 AND ss_net_paid > 100.0 AND ss_net_paid < 200.0 AND ss_list_price < 100.0")
   )
 }
