@@ -149,6 +149,7 @@ object OapPerfSuite extends Logging {
 
     val res = suite.resultMap.toSeq
     if (res.nonEmpty) {
+      println(suite.getClass.getCanonicalName)
       TestUtil.formatResults(res)
     }
   }
