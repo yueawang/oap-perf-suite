@@ -108,7 +108,7 @@ object TestUtil {
 
 // TODO: use DataSet.show()??
 object Tabulator {
-  val MAX_WIDTH = 96
+  val MAX_WIDTH = 64
 
   def truncate(value: String, length: Int = MAX_WIDTH): String = {
     assert(length > 3)

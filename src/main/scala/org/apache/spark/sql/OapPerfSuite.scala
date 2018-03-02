@@ -21,8 +21,8 @@
 package org.apache.spark.sql
 
 import scala.reflect.runtime.universe
-
 import org.apache.spark.internal.Logging
+import org.apache.spark.sql.suites.LocalSparkMasterTestSuite
 import org.reflections.Reflections
 
 import scala.collection.mutable
@@ -114,8 +114,10 @@ object OapPerfSuite extends Logging {
         }
         case "-bootstrapping" => {
           // self test.
-          BenchmarkSuiteSelector.build("LocalSparkMasterTestSuite")
+          assert(args.length == i + 1, "bootstrapping works alone.")
+          runSuite(LocalSparkMasterTestSuite, 3)
           i += 1
+          sys.exit(1)
         }
         case _ => sys.error(usage)
       }

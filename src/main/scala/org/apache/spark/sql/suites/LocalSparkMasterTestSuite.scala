@@ -86,7 +86,7 @@ object LocalSparkMasterTestSuite extends OapTestSuite with ParquetOnlyConfigSet 
       s"SELECT * FROM $tableName WHERE $attr = 1"),
     OapBenchmarkTest("eq = 2",
       s"SELECT * FROM $tableName WHERE $attr = 2"),
-    OapBenchmarkTest("eq = 3333333333333333333333333333333333333333333333333333333444455555",
+    OapBenchmarkTest("check how many char can be displayed in name column-54--------64-----",
       s"SELECT * FROM $tableName WHERE $attr = 2")
 
   )
