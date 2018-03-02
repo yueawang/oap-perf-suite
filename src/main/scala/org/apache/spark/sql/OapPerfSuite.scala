@@ -149,7 +149,9 @@ object OapPerfSuite extends Logging {
 
     val res = suite.resultMap.toSeq
     if (res.nonEmpty) {
-      println(suite.getClass.getCanonicalName)
+      // Object's Name is XXXXX$, so remove this $
+      // TODO: check if $ exists.
+      println("#"+ suite.getClass.getCanonicalName.dropRight(1))
       TestUtil.formatResults(res)
     }
   }
