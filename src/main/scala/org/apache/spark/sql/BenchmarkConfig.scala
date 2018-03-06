@@ -175,6 +175,6 @@ trait OapStrategyConfigSet extends BenchmarkConfigSelector{
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
       .setSqlConf("spark.sql.oap.oindex.eis.enabled", "true")
       .setSqlConf("spark.sql.oap.oindex.file.policy", "true")
-      .setSqlConf("spark.sql.oap.oindex.statistics.policy", "true"),
+      .setSqlConf("spark.sql.oap.oindex.statistics.policy", "true")
   )
 }
