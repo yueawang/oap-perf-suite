@@ -31,6 +31,16 @@ class BenchmarkConfig {
     this
   }
 
+  /** A meaningful name for this config
+   * like "oap + index" or "parquet w/o index" or "oap and oapStrategy enable"
+   */
+  def setBenchmarkConfName(name: String): BenchmarkConfig = {
+    confName = Option(name)
+    this
+  }
+
+  private var confName: Option[String] = None
+
   def setSqlConf(name: String, value: String): BenchmarkConfig = {
     sqlConf.put(name, value)
     this
@@ -46,7 +56,7 @@ class BenchmarkConfig {
 
   def allSqlOptions(): Map[String, String] = sqlConf.toMap[String, String]
 
-  override def toString: String = {
+  def configString: String = {
     if (sqlConf.isEmpty) {
       val indexEnable = if (getBenchmarkConf(BenchmarkConfig.INDEX_ENABLE).toBoolean) {
         "W/ Index"
@@ -66,6 +76,13 @@ class BenchmarkConfig {
         }
         flag + setting._1.split('.')(4)
       }.mkString(getBenchmarkConf(BenchmarkConfig.FILE_FORMAT) + " ", " & ", "")
+    }
+  }
+
+  override def toString: String = {
+    confName match {
+      case Some(name) => name
+      case None => configString
     }
   }
 }
@@ -103,9 +120,11 @@ trait ParquetOnlyConfigSet extends BenchmarkConfigSelector{
   // TODO: choose conf
   def allConfigurations: Seq[BenchmarkConfig] = Seq(
     new BenchmarkConfig()
+      .setBenchmarkConfName("parquet w/ index")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "parquet")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true"),
     new BenchmarkConfig()
+      .setBenchmarkConfName("parquet w/o index")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "parquet")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "false")
   )
@@ -115,15 +134,19 @@ trait ParquetVsOapConfigSet extends BenchmarkConfigSelector{
   // TODO: choose conf
   def allConfigurations: Seq[BenchmarkConfig] = Seq(
     new BenchmarkConfig()
+      .setBenchmarkConfName("oap w/ index")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true"),
     new BenchmarkConfig()
+      .setBenchmarkConfName("oap w/o index")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "false"),
     new BenchmarkConfig()
+      .setBenchmarkConfName("parquet w/ index")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "parquet")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true"),
     new BenchmarkConfig()
+      .setBenchmarkConfName("parquet w/o index")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "parquet")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "false")
   )
@@ -133,22 +156,25 @@ trait OapStrategyConfigSet extends BenchmarkConfigSelector{
   // TODO: choose conf
   def allConfigurations: Seq[BenchmarkConfig] = Seq(
     new BenchmarkConfig()
+      .setBenchmarkConfName("oapStrategy enabled")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
       .setSqlConf("spark.sql.oap.oindex.eis.enabled", "false")
       .setSqlConf("spark.sql.oap.oindex.file.policy", "false")
       .setSqlConf("spark.sql.oap.oindex.statistics.policy", "false"),
     new BenchmarkConfig()
+      .setBenchmarkConfName("oapStrategy disabled w/o statistics check")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
       .setSqlConf("spark.sql.oap.oindex.eis.enabled", "true")
       .setSqlConf("spark.sql.oap.oindex.file.policy", "false")
       .setSqlConf("spark.sql.oap.oindex.statistics.policy", "false"),
     new BenchmarkConfig()
+      .setBenchmarkConfName("oapStrategy disabled w/ statistics check")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
       .setSqlConf("spark.sql.oap.oindex.eis.enabled", "true")
       .setSqlConf("spark.sql.oap.oindex.file.policy", "true")
-      .setSqlConf("spark.sql.oap.oindex.statistics.policy", "true")
+      .setSqlConf("spark.sql.oap.oindex.statistics.policy", "true"),
   )
 }
