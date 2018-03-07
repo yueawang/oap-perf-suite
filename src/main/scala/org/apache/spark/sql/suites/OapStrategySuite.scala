@@ -102,11 +102,14 @@ object OapStrategySuite extends OapTestSuite with OapStrategyConfigSet with OapS
   }
 
   val table = "store_sales"
+
   val leftTable = "store_sales_dup"
+
   val btreeIndexAttr = "ss_ticket_number"
+
   val bitmapIndexAttr = "ss_item_sk1"
-  val range1to10 = (1 to 10).mkString(",")
-  val range1to5 = (1 to 5).mkString(",")
+
+  val range1to100 = (1 to 100).mkString(",")
 
   override def testSet: Seq[OapBenchmarkTest] = Seq(
     // Order by limit
@@ -119,11 +122,11 @@ object OapStrategySuite extends OapTestSuite with OapStrategyConfigSet with OapS
     // TODO: add semi join test case.
 
     // Aggregation
-    OapBenchmarkTest("Aggregation on bitmap index in range1to5",
-       s"SELECT $bitmapIndexAttr, max(${btreeIndexAttr}) FROM $table " +
-            s"WHERE $bitmapIndexAttr IN ( $range1to5 ) " +
-            s"GROUP BY $bitmapIndexAttr"),
-    OapBenchmarkTest("Aggregation on btree index where btreeIndexAtrr < 1000000",
+    OapBenchmarkTest("btree index aggregation value in 1 to 100",
+      s"SELECT $btreeIndexAttr, max(${bitmapIndexAttr}) FROM $table " +
+        s"WHERE $btreeIndexAttr IN ( $range1to100 ) " +
+        s"GROUP BY $btreeIndexAttr"),
+      OapBenchmarkTest("btree index aggregation value < 1000000",
       s"SELECT $btreeIndexAttr, max(${bitmapIndexAttr}) FROM $table " +
         s"WHERE $btreeIndexAttr < 1000000 " +
         s"GROUP BY $btreeIndexAttr")
