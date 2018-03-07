@@ -1,5 +1,7 @@
 import sys
 import os
+
+# parse result file and return as {suite: {case: {config: value} } }
 def parseFile(fileName):
     file = open(fileName)
     suitesLines = []
@@ -30,41 +32,36 @@ def parseFile(fileName):
         res[suitesNames[i]] = tpres
     return res
 
-style="""<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
-.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
-.tg .tg-y2tu{font-weight:bold;text-decoration:underline;vertical-align:top}
-.tg .tg-baqh{text-align:center;vertical-align:top}
-.tg .tg-lqy6{text-align:right;vertical-align:top}
-.tg .tg-yw4l{vertical-align:top}
-.tg .tg-ahyg{font-weight:bold;background-color:#fe0000;vertical-align:top}
-</style>"""
-
 if __name__ == '__main__':
     args = sys.argv
     if(len(args) != 4):
         exit(1)
     resOld = parseFile(args[1])
     resNew = parseFile(args[2])
+    baseNameOld = os.path.basename(args[1])[8:]
+    baseNameNew = os.path.basename(args[2])[8:]
     htmlContent = """
     <!DOCTYPE html>
     <html>
     <style type="text/css">
-        .tg  {border-collapse:collapse;border-spacing:0;}
-        .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
-        .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
-        .tg .tg-y2tu{font-weight:bold;text-decoration:underline;vertical-align:top}
-        .tg .tg-baqh{text-align:center;vertical-align:top}
-        .tg .tg-lqy6{text-align:right;vertical-align:top}
-        .tg .tg-yw4l{vertical-align:top}
-        .tg .tg-ahyg{font-weight:bold;background-color:#fe0000;vertical-align:top}
+        .tg {{border-collapse:collapse;border-spacing:0;}}
+        .tg td {{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}}
+        .tg th {{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}}
+        .tg .tg-y2tu {{font-weight:bold;text-decoration:underline;vertical-align:top}}
+        .tg .tg-baqh {{text-align:center;vertical-align:top}}
+        .tg .tg-lqy6 {{text-align:right;vertical-align:top}}
+        .tg .tg-yw4l {{vertical-align:top}}
+        .tg .tg-ahyg {{font-weight:bold;background-color:#fe0000;vertical-align:top}}
     </style>
     <head>
 	    <title>Daily Benchmark Test Result</title>
 	    <meta charset="utf-8">
     </head>
     <body>
+        <p>Result paths are:<br> (1){} <br> (2){}</p>
+        {}
+    </body>
+    </html>
     """
     htmlTables = ""
     for suite, suiteRes in resNew.items():
@@ -89,9 +86,16 @@ if __name__ == '__main__':
                         suiteTable += """<td class="tg-lqy6">{}</td>\n""".format(resOld[suite][case][config])
                         suiteTable += """<td class="tg-yw4l">{}</td>\n""".format(median)
                         if(median > resOld[suite][case][config]):
-                            suiteTable += """<td class="tg-ahyg">True</td>\n"""
+                            if(resOld[suite][case][config] != 0):
+                                per = (median - resOld[suite][case][config]) * 1.0 / resOld[suite][case][config]
+                                if(per <= 0.15):
+                                    suiteTable += """<td class="tg-yw41">No</td>\n"""
+                                else:
+                                    suiteTable += """<td class="tg-ahyg">Yes</td>\n"""
+                            else:
+                                suiteTable += """<td class="tg-ahyg">Yes</td>\n"""
                         else:
-                            suiteTable += """<td class="tg-yw41">False</td>\n"""
+                            suiteTable += """<td class="tg-yw41">No</td>\n"""
                     else:
                         suiteTable += """<td class="tg-lqy6">{}</td>\n""".format("N/A")
                         suiteTable += """<td class="tg-yw4l">{}</td>\n""".format(median)
@@ -101,5 +105,5 @@ if __name__ == '__main__':
             suiteTable += "</table>\n"
             htmlTables += "\n{}\n".format(suiteTable)
     cmpFile=open(args[3], mode='w')
-    cmpFile.write(htmlContent + htmlTables + "</body>\n</html>")
+    cmpFile.write(htmlContent.format("sr530:" + os.path.abspath(args[1]), "sr530:" + os.path.abspath(args[2]), htmlTables))
     cmpFile.close()
