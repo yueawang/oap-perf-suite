@@ -50,7 +50,7 @@ function cloneAndBuild {
     ln -f target/oap-${versionNum}.jar ${jarPath}/oap.jar
     # compile oap-perf-suite
     cd ../oap-perf-suite
-    if ! sbt assembly 1>&3 2>&3; then return 1; fi
+    if ! sbt -Dsbt.log.noformat=true --error assembly 1>&3 2>&3; then return 1; fi
 }
 
 function genData {
@@ -82,7 +82,8 @@ function runTask {
     --class org.apache.spark.sql.OapPerfSuite \
     ./oap-perf-suite/target/scala-2.11/oap-perf-suite-assembly-1.0.jar \
     -r 5 \
-    > ./testres_${today}
+    1>./testres_${today} \
+    2>&3
 }
 
 function main {
@@ -144,9 +145,10 @@ function main {
             echo "lastResPath=${todayPath}" > $lastPath
         fi
     else
-        exec 3>./testlog
+        exec 3>/dev/null
         exec 3>&1
-        checkCrontab
+        # crontab only edited by root
+        [ `id -u` -eq 0 ] && checkCrontab
         sourceEnv
         if [ -n "$1" ] && [ "$1" = "-g" ]; then genData; fi
     fi
