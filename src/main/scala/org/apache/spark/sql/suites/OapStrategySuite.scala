@@ -105,7 +105,7 @@ object OapStrategySuite extends OapTestSuite with OapStrategyConfigSet with OapS
 
   val leftTable = "store_sales_dup"
 
-  val btreeIndexAttr = "ss_ticket_number"
+  val btreeIndexAttr = "ss_customer_sk"
 
   val bitmapIndexAttr = "ss_item_sk1"
 
@@ -126,9 +126,9 @@ object OapStrategySuite extends OapTestSuite with OapStrategyConfigSet with OapS
       s"SELECT $btreeIndexAttr, max(${bitmapIndexAttr}) FROM $table " +
         s"WHERE $btreeIndexAttr IN ( $range1to100 ) " +
         s"GROUP BY $btreeIndexAttr"),
-      OapBenchmarkTest("btree index aggregation value < 1000000",
+      OapBenchmarkTest("btree index aggregation value < 100000",
       s"SELECT $btreeIndexAttr, max(${bitmapIndexAttr}) FROM $table " +
-        s"WHERE $btreeIndexAttr < 1000000 " +
+        s"WHERE $btreeIndexAttr < 100000 " +
         s"GROUP BY $btreeIndexAttr")
   )
 }

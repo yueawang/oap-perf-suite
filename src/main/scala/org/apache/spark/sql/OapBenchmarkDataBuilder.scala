@@ -173,7 +173,7 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
     dataFormats.foreach { dataFormat => {
         spark.sql(s"USE ${dataFormat}_tpcds_${dataScale}")
         val tablePath: String = s"$hdfsRootDir/${versionNum}/tpcds/tpcds${dataScale}/${dataFormat}/"
-        buildBtreeIndex(tablePath, "store_sales", "ss_ticket_number")
+        buildBtreeIndex(tablePath, "store_sales", "ss_customer_sk")
         buildBitmapIndex(tablePath, "store_sales", "ss_item_sk1")
       }
     }

@@ -24,7 +24,7 @@ object BtreeIndexSuite extends OapTestSuite with OapPerfSuiteContext with Parque
 
   val table = "store_sales"
 
-  val attr = "ss_ticket_number"
+  val attr = "ss_customer_sk"
 
   def databaseName = {
     val conf = activeConf
@@ -84,37 +84,37 @@ object BtreeIndexSuite extends OapTestSuite with OapPerfSuiteContext with Parque
   override def testSet = Seq(
     OapBenchmarkTest("attr < Int.MaxValue",
       s"SELECT * FROM $table WHERE $attr < ${Int.MaxValue}"),
-    OapBenchmarkTest("attr < 2000000",
-      s"SELECT * FROM $table WHERE $attr < 2000000"),
     OapBenchmarkTest("attr < 100000",
       s"SELECT * FROM $table WHERE $attr < 100000"),
     OapBenchmarkTest("attr < 10000",
       s"SELECT * FROM $table WHERE $attr < 10000"),
-    OapBenchmarkTest("attr = 6000000",
-      s"SELECT * FROM $table WHERE $attr = 6000000"),
-    OapBenchmarkTest("attr BETWEEN 100 & 200",
-      s"SELECT * FROM $table WHERE $attr BETWEEN 100 AND 200"),
-    OapBenchmarkTest("attr BETWEEN 100 & 400",
-      s"SELECT * FROM $table WHERE $attr BETWEEN 100 AND 400"),
-    OapBenchmarkTest("attr BETWEEN 100 & 800",
-      s"SELECT * FROM $table WHERE $attr BETWEEN 100 AND 800"),
+    OapBenchmarkTest("attr < 1000",
+      s"SELECT * FROM $table WHERE $attr < 1000"),
+    OapBenchmarkTest("attr = 600000",
+      s"SELECT * FROM $table WHERE $attr = 600000"),
+    OapBenchmarkTest("attr BETWEEN 10 & 20",
+      s"SELECT * FROM $table WHERE $attr BETWEEN 10 AND 20"),
+    OapBenchmarkTest("attr BETWEEN 10 & 40",
+      s"SELECT * FROM $table WHERE $attr BETWEEN 10 AND 40"),
+    OapBenchmarkTest("attr BETWEEN 10 & 80",
+      s"SELECT * FROM $table WHERE $attr BETWEEN 10 AND 80"),
     
     // Two columns query
-    OapBenchmarkTest("attr < 2000000 & ss_customer_sk >= 120000",
-      s"SELECT * FROM $table WHERE $attr < 2000000 AND ss_customer_sk >= 120000"),
-    OapBenchmarkTest("attr < 100000 & ss_list_price < 100.0",
-      s"SELECT * FROM $table WHERE $attr < 100000 AND ss_list_price < 100.0"),
-    OapBenchmarkTest("attr < 10000 & ss_net_paid < 200.0",
-      s"SELECT * FROM $table WHERE $attr < 10000 AND ss_net_paid > 100.0 AND ss_net_paid < 200.0"),
-    OapBenchmarkTest("attr < 10000 & ss_net_paid in [100.0, 110.0]",
-      s"SELECT * FROM $table WHERE $attr < 10000 AND ss_net_paid BETWEEN 100.0 AND 110.0"),
+    OapBenchmarkTest("attr < 100000 & ss_ticket_number >= 120000",
+      s"SELECT * FROM $table WHERE $attr < 100000 AND ss_ticket_number >= 120000"),
+    OapBenchmarkTest("attr < 10000 & ss_list_price < 100.0",
+      s"SELECT * FROM $table WHERE $attr < 10000 AND ss_list_price < 100.0"),
+    OapBenchmarkTest("attr < 1000 & ss_net_paid < 200.0",
+      s"SELECT * FROM $table WHERE $attr < 1000 AND ss_net_paid > 100.0 AND ss_net_paid < 200.0"),
+    OapBenchmarkTest("attr < 1000 & ss_net_paid in [100.0, 110.0]",
+      s"SELECT * FROM $table WHERE $attr < 1000 AND ss_net_paid BETWEEN 100.0 AND 110.0"),
 
     // Three columns query
-    OapBenchmarkTest("attr < 2000000 & ss_customer_sk >= 120000 & ss_list_price < 100.0",
-      s"SELECT * FROM $table WHERE $attr < 2000000 AND ss_customer_sk >= 120000 AND ss_list_price < 100.0"),
-    OapBenchmarkTest("attr < 100000 & ss_list_price < 100.0 & ss_net_paid > 500.0",
-      s"SELECT * FROM $table WHERE $attr < 100000 AND ss_list_price < 100.0 AND ss_net_paid > 500.0"),
-    OapBenchmarkTest("attr < 10000 & ss_net_paid > 100.0 & ss_net_paid < 110.0 & ss_list_price < 100.0",
-      s"SELECT * FROM $table WHERE $attr < 10000 AND ss_net_paid > 100.0 AND ss_net_paid < 110.0 AND ss_list_price < 100.0")
+    OapBenchmarkTest("attr < 100000 & ss_ticket_number >= 120000 & ss_list_price < 100.0",
+      s"SELECT * FROM $table WHERE $attr < 100000 AND ss_ticket_number >= 120000 AND ss_list_price < 100.0"),
+    OapBenchmarkTest("attr < 10000 & ss_list_price < 100.0 & ss_net_paid > 500.0",
+      s"SELECT * FROM $table WHERE $attr < 10000 AND ss_list_price < 100.0 AND ss_net_paid > 500.0"),
+    OapBenchmarkTest("attr < 1000 & ss_net_paid > 100.0 & ss_net_paid < 110.0 & ss_list_price < 100.0",
+      s"SELECT * FROM $table WHERE $attr < 1000 AND ss_net_paid > 100.0 AND ss_net_paid < 110.0 AND ss_list_price < 100.0")
   )
 }
