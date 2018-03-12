@@ -1,5 +1,6 @@
-import sys
+import collections
 import os
+import sys
 
 # parse result file and return as {suite: {case: {config: value} } }
 def parseFile(fileName):
@@ -76,7 +77,8 @@ if __name__ == '__main__':
             for case, caseRes in suiteRes.items():
                 configNums = len(caseRes)
                 j = 0
-                for config, median in caseRes.items():
+                odRes = collections.OrderedDict(sorted(caseRes.items()))
+                for config, median in odRes.items():
                     if(j == 0):
                         suiteTable += """<tr>\n<td class="tg-yw4l" rowspan="{}">{}</td>\n""".format(configNums, case)
                         suiteTable +=  """<td class="tg-yw4l">{}</td>\n""".format(config)
@@ -104,6 +106,6 @@ if __name__ == '__main__':
                     j += 1
             suiteTable += "</table>\n"
             htmlTables += "\n{}\n".format(suiteTable)
-    cmpFile=open(args[3], mode='w')
+    cmpFile = open(args[3], mode='w')
     cmpFile.write(htmlContent.format("sr530:" + os.path.abspath(args[1]), "sr530:" + os.path.abspath(args[2]), htmlTables))
     cmpFile.close()
