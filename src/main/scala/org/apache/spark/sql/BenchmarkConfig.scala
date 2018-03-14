@@ -26,6 +26,9 @@ class BenchmarkConfig {
   // SQLConf, send to Spark to change the sql query behavior.
   private val sqlConf: mutable.HashMap[String, String] = mutable.HashMap.empty
 
+  // Spark conf, to initial spark session.
+  private val sparkConf: mutable.HashMap[String, String] = mutable.HashMap.empty
+
   def setBenchmarkConf(name: String, value: String): BenchmarkConfig = {
     benchmarkConf.put(name, value)
     this
@@ -46,16 +49,58 @@ class BenchmarkConfig {
     this
   }
 
-  // Find a conf from either benchmark conf or sql conf.
-  def getConf(name: String): String =
-    benchmarkConf.get(name).getOrElse(sqlConf.get(name).getOrElse(s"$name Not Exist!!!"))
+  def setSparkConf(name: String, value: String): BenchmarkConfig = {
+    sparkConf.put(name, value)
+    this
+  }
 
+  /**
+   *  Find a conf from all conf settings.
+   */
+  def getConf(name: String): String = {
+    benchmarkConf.get(name).getOrElse(
+      sqlConf.get(name).getOrElse(
+        sparkConf.get(name).getOrElse(
+          s"$name Not Exist!!!")))
+  }
+
+  /**
+   * Get benchmark config
+   * @param name: name
+   * @return benchmark config setting.
+   */
   def getBenchmarkConf(name: String): String = benchmarkConf.getOrElse(name, "false")
 
+  /**
+   * Get sql config
+   * @param name: name
+   * @return sql config setting.
+   */
   def getSqlConf(name: String): String = sqlConf.getOrElse(name, "false")
 
+  /**
+   * Get spark config
+   * @param name: name
+   * @return sql config setting.
+   */
+  def getSparkConf(name: String): String = sparkConf.getOrElse(name, "false")
+
+  /**
+   * Get all sql config
+   * @return all sql config settings.
+   */
   def allSqlOptions(): Map[String, String] = sqlConf.toMap[String, String]
 
+  /**
+   * Get all spark config
+   * @return all spark config settings.
+   */
+  def allSparkOptions(): Map[String, String] = sparkConf.toMap[String, String]
+
+  /**
+   * Make config settings as config name, used if none name set.
+   * @return
+   */
   def configString: String = {
     if (sqlConf.isEmpty) {
       val indexEnable = if (getBenchmarkConf(BenchmarkConfig.INDEX_ENABLE).toBoolean) {
@@ -88,8 +133,8 @@ class BenchmarkConfig {
 }
 
 object BenchmarkConfig {
-  val INDEX_ENABLE = "oap.perf.config.index"
-  val FILE_FORMAT  = "oap.perf.config.format"
+  val INDEX_ENABLE = "oap.benchmark.config.index"
+  val FILE_FORMAT  = "oap.benchmark.config.format"
 }
 
 abstract class BenchmarkConfigSelector {
@@ -165,5 +210,26 @@ trait OapStrategyConfigSet extends BenchmarkConfigSelector{
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
       .setSqlConf("spark.sql.oap.oindex.eis.enabled", "true")
+  )
+}
+
+trait LocalClusterConfigSet extends BenchmarkConfigSelector {
+  // TODO: choose conf
+  def allConfigurations: Seq[BenchmarkConfig] = Seq(
+    new BenchmarkConfig()
+      .setBenchmarkConfName("local cluster 100m offheap")
+      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
+      .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
+      .setSparkConf("spark.memory.offHeap.enabled", "true")
+      .setSparkConf("spark.memory.offHeap.size", "100m"),
+    // TODO: Here this config does not work because in local
+    // mode, MemoryManager initialization do only once as it
+    // is a object. 
+    new BenchmarkConfig()
+      .setBenchmarkConfName("local cluster no offheap")
+      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
+      .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
+      .setSparkConf("spark.memory.offHeap.enabled", "false")
+      .setSparkConf("spark.memory.offHeap.size", "0")
   )
 }

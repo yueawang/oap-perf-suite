@@ -22,8 +22,8 @@ import org.apache.spark.sql.internal.oap.OapConf
 
 object OapStrategySuite extends OapTestSuite with OapStrategyConfigSet with OapStrategies {
 
-  override def beforeAll(): Unit = {
-    super.beforeAll()
+  override def beforeAll(conf: Map[String, String] = Map.empty): Unit = {
+    super.beforeAll(conf)
     spark.experimental.extraStrategies = oapStrategies
   }
 

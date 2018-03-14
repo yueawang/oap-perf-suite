@@ -19,7 +19,7 @@ package org.apache.spark.sql.suites
 import org.apache.spark.sql._
 import org.apache.spark.util.Utils
 
-object LocalSparkMasterTestSuite extends OapTestSuite with ParquetOnlyConfigSet {
+object LocalSparkMasterTestSuite extends OapTestSuite with LocalClusterConfigSet {
 
   protected object testImplicits extends SQLImplicits {
     protected override def _sqlContext: SQLContext = spark.sqlContext

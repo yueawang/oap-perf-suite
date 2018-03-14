@@ -21,12 +21,9 @@
 package org.apache.spark.sql
 
 import sys.process._
-
 import org.apache.spark._
 
 trait OapPerfSuiteContext {
-
-  protected val sparkConf = new SparkConf()
 
   /**
     * The [[SparkSession]] to use for all tests in this suite.
@@ -47,13 +44,23 @@ trait OapPerfSuiteContext {
   protected implicit def sqlContext: SQLContext = _spark.sqlContext
 
   def isBootStrapping = false
-  protected def createSparkSession: SparkSession = {
+  protected def createSparkSession(conf: Map[String, String] = Map.empty): SparkSession = {
     if (isBootStrapping) {
-      new SparkSession(new SparkContext("local[2]", "test-sql-context",
-        sparkConf.set("spark.sql.testkey", "true")
-          .set("spark.memory.offHeap.size", "100m")))
+      val sparkConf = new SparkConf().set("spark.sql.testkey", "true")
+      conf.foreach(option => sparkConf.set(option._1, option._2))
+
+      new SparkSession(
+        // TODO: support s"local-cluster[2, 1, ${4*1024*1024}]",
+        new SparkContext(
+          "local[2]",
+          "test-sql-context",
+          sparkConf
+        )
+      )
     } else {
-      SparkSession.builder().appName(getAppName).enableHiveSupport().getOrCreate()
+      val builder = SparkSession.builder().appName(getAppName)
+      conf.foreach(option => builder.config(option._1, option._2))
+      builder.enableHiveSupport().getOrCreate()
     }
   }
 
@@ -62,9 +69,9 @@ trait OapPerfSuiteContext {
   /**
    * Initialize the [[SparkSession]].
    */
-  def beforeAll(): Unit = {
+  def beforeAll(conf: Map[String, String] = Map.empty): Unit = {
     if (_spark == null) {
-      _spark = createSparkSession
+      _spark = createSparkSession(conf)
       SparkSession.setActiveSession(_spark)
     }
   }

@@ -39,8 +39,8 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
 
   private val properties = new mutable.HashMap[String, String]
 
-  override def beforeAll(): Unit = {
-    super.beforeAll()
+  override def beforeAll(conf: Map[String, String] = Map.empty): Unit = {
+    super.beforeAll(conf)
     try {
       Utils.getPropertiesFromFile("./oap-benchmark-default.conf").foreach{ case (k, v) =>
         properties(k) = v

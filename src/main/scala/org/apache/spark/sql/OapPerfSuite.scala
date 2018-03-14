@@ -135,8 +135,7 @@ object OapPerfSuite extends Logging {
     suite.allConfigurations
       .filter(BenchmarkConfigSelector.isSelected(_))
       .foreach{ conf =>
-        suite.beforeAll()
-        suite.withTestConf(conf){
+        suite.runWith(conf){
           logWarning(s"running $suite with conf($conf).")
           if (BenchmarkTestSelector.selectedTests().nonEmpty) {
             BenchmarkTestSelector.selectedTests().foreach{
@@ -146,7 +145,6 @@ object OapPerfSuite extends Logging {
             suite.runAll(repeat)
           }
         }
-        suite.afterAll()
       }
 
     val res = suite.resultMap.toSeq

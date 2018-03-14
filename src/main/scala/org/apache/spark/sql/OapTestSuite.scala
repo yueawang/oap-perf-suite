@@ -67,13 +67,15 @@ abstract class OapTestSuite extends BenchmarkConfigSelector with OapPerfSuiteCon
   }
 
   private var _activeConf: Option[BenchmarkConfig] = None
-  def withTestConf(conf: BenchmarkConfig)(f: => Unit): Unit = {
+  def runWith(conf: BenchmarkConfig)(body: => Unit): Unit = {
     _activeConf = Some(conf)
+    beforeAll(conf.allSparkOptions())
     if (prepare()){
-      f
+      body
     } else {
       assert(false, s"$this checkCondition Failed!")
     }
+    afterAll()
     _activeConf = None
   }
 
