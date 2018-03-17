@@ -204,12 +204,14 @@ trait OapStrategyConfigSet extends BenchmarkConfigSelector{
       .setBenchmarkConfName("oapStrategy enabled")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
-      .setSqlConf("spark.sql.oap.oindex.eis.enabled", "false"),
+      .setSqlConf("spark.sql.oap.oindex.eis.enabled", "false")
+      .setSqlConf("spark.sql.oap.strategies.enabled", "true"),
     new BenchmarkConfig()
       .setBenchmarkConfName("oapStrategy disabled")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
       .setSqlConf("spark.sql.oap.oindex.eis.enabled", "true")
+      .setSqlConf("spark.sql.oap.strategies.enabled", "false")
   )
 }
 
