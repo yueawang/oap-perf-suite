@@ -42,7 +42,7 @@ class BenchmarkConfig {
     this
   }
 
-  private var confName: Option[String] = None
+  var confName: Option[String] = None
 
   def setSqlConf(name: String, value: String): BenchmarkConfig = {
     sqlConf.put(name, value)
@@ -152,9 +152,10 @@ object BenchmarkConfigSelector {
 
   def isSelected(config: BenchmarkConfig): Boolean = {
     if (wildcardConfiguration.nonEmpty) {
-      wildcardConfiguration.map{conf =>
+      wildcardConfiguration.exists{conf =>
         config.getConf(conf._1) == conf._2
-      }.reduce(_ && _)
+        config.confName.equals(conf._2)
+      }
     } else {
       true
     }
@@ -227,11 +228,13 @@ trait LocalClusterConfigSet extends BenchmarkConfigSelector {
     // TODO: Here this config does not work because in local
     // mode, MemoryManager initialization do only once as it
     // is a object. 
-    new BenchmarkConfig()
-      .setBenchmarkConfName("local cluster no offheap")
-      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
-      .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
-      .setSparkConf("spark.memory.offHeap.enabled", "false")
-      .setSparkConf("spark.memory.offHeap.size", "0")
+//    new BenchmarkConfig()
+//      .setBenchmarkConfName("executor on/off heap: 100/0")
+//      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
+//      .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
+//      .setSparkConf("spark.memory.offHeap.enabled", "true")
+//      .setSparkConf("spark.yarn.executor.memoryOverhead", "1g")
+//      .setSparkConf("spark.executor.memory", "100g")
+//      .setSparkConf("spark.sql.oap.offheap.enable", "false")
   )
 }
