@@ -224,7 +224,7 @@ trait LocalClusterConfigSet extends BenchmarkConfigSelector {
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
       .setSparkConf("spark.memory.offHeap.enabled", "true")
-      .setSparkConf("spark.memory.offHeap.size", "100m"),
+      .setSparkConf("spark.memory.offHeap.size", "100m")
     // TODO: Here this config does not work because in local
     // mode, MemoryManager initialization do only once as it
     // is a object. 
