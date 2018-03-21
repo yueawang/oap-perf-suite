@@ -47,6 +47,7 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext with Logging {
       case "parquet" => s"parquet_tpcds_$dataScale"
       case _ => "default"
     }
+
     prefix + baseName + postfix
   }
 
@@ -80,7 +81,7 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext with Logging {
 
     sqlContext.setConf("spark.sql.parquet.compression.codec", codec)
     dataFormats.foreach{ format =>
-      val loc = formatTableLocation(hdfsRootDir, versionNum, getDatabase(format))
+      val loc = formatTableLocation(hdfsRootDir, versionNum, format)
       val tables = new Tables(sqlContext, tpcdsToolPath, scale)
       tables.genData(
         loc, format, true, false, true, false, false, "store_sales", partitions)
@@ -178,8 +179,8 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext with Logging {
     val dataFormats: Seq[String] = Seq("oap", "parquet")
 
     dataFormats.foreach { dataFormat => {
-        spark.sql(s"USE ${getDatabase(dataFormat)}")
-        val tableLocation: String = formatTableLocation(hdfsRootDir, versionNum, getDatabase(dataFormat))
+        spark.sql(s"use ${getDatabase(dataFormat)}")
+        val tableLocation: String = formatTableLocation(hdfsRootDir, versionNum, dataFormat)
         buildBtreeIndex(tableLocation, "store_sales", "ss_customer_sk")
         buildBitmapIndex(tableLocation, "store_sales", "ss_item_sk1")
       }
