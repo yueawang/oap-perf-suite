@@ -110,7 +110,12 @@ object OapPerfSuite extends Logging {
           OapBenchmarkDataBuilder.generateDatabases()
           OapBenchmarkDataBuilder.buildAllIndex()
           OapBenchmarkDataBuilder.afterAll()
-          i += 1
+          // if run with -d only
+          if(i == 0 && args.length == 1){
+            sys.exit()
+          } else {
+            i += 1
+          }
         }
         case "-bootstrapping" => {
           // self test.

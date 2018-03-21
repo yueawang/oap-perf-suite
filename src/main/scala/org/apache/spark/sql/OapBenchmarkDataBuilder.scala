@@ -34,7 +34,7 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
     "oap.benchmark.tpcds.tool.dir"        -> "/home/oap/tpcds-kit/tools",
     "oap.benchmark.hdfs.file.root.dir"    -> "/user/oap/oaptest/",
     "oap.benchmark.database.prefix"       -> "",
-    "oap.benchmark.database.postfix"       -> "",
+    "oap.benchmark.database.postfix"      -> "",
     "oap.benchmark.tpcds.data.scale"      -> "200",
     "oap.benchmark.tpcds.data.partition"  -> "80"
   )
@@ -55,19 +55,20 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
     s"${rootDir}/${versionNum}/tpcds/${getDatabase(tableFormat)}"
   }
 
-  private val properties = new mutable.HashMap[String, String] ++= defaultProperties
-
-  override def beforeAll(conf: Map[String, String] = Map.empty): Unit = {
-    super.beforeAll(conf)
+  private val properties = {
     try {
-      Utils.getPropertiesFromFile("./oap-benchmark-default.conf").foreach{ case (k, v) =>
-        properties(k) = v
-      }
+      new mutable.HashMap[String, String]() ++=
+        Utils.getPropertiesFromFile("./oap-benchmark-default.conf")
     } catch {
       case e: IllegalArgumentException => {
         println(e.getMessage + ". Use default setting!")
+        defaultProperties
       }
     }
+  }
+
+  override def beforeAll(conf: Map[String, String] = Map.empty): Unit = {
+    super.beforeAll(conf)
   }
 
   def generateTables(dataFormats: Array[String] = Array("oap", "parquet")): Unit = {

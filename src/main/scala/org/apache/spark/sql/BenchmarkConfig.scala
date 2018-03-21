@@ -236,5 +236,15 @@ trait LocalClusterConfigSet extends BenchmarkConfigSelector {
 //      .setSparkConf("spark.yarn.executor.memoryOverhead", "1g")
 //      .setSparkConf("spark.executor.memory", "100g")
 //      .setSparkConf("spark.sql.oap.offheap.enable", "false")
+//    ,
+//    new BenchmarkConfig()
+//      .setBenchmarkConfName("executor on/off heap: 100+10/0")
+//      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
+//      .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
+//      .setSparkConf("spark.memory.offHeap.enabled", "true")
+//      .setSparkConf("spark.yarn.executor.memoryOverhead", "1g")
+//      .setSparkConf("spark.executor.memory", "110g")
+//      .setSparkConf("spark.sql.oap.onheap.size", "10g")
+//      .setSparkConf("spark.sql.oap.offheap.enable", "false")
   )
 }
