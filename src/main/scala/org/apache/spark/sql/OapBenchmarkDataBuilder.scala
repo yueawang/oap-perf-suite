@@ -52,7 +52,7 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext with Logging {
   }
 
   def formatTableLocation(rootDir: String, versionNum: String, tableFormat: String): String = {
-    s"${rootDir}/${versionNum}/tpcds/${getDatabase(tableFormat)}"
+    s"${rootDir}/${versionNum}/tpcds/${getDatabase(tableFormat)}/"
   }
 
   private val properties = {
