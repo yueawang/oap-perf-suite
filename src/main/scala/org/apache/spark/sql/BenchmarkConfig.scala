@@ -153,7 +153,7 @@ object BenchmarkConfigSelector {
   def isSelected(config: BenchmarkConfig): Boolean = {
     if (wildcardConfiguration.nonEmpty) {
       wildcardConfiguration.exists{conf =>
-        config.getConf(conf._1) == conf._2
+        config.getConf(conf._1) == conf._2 ||
         config.confName.equals(conf._2)
       }
     } else {
