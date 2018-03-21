@@ -40,8 +40,8 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
   )
 
   def getDatabase(format: String) : String = {
-    val prefix = properties.get("oap.benchmark.database.prefix")
-    val postfix = properties.get("oap.benchmark.database.postfix")
+    val prefix = properties.get("oap.benchmark.database.prefix").get
+    val postfix = properties.get("oap.benchmark.database.postfix").get
     val dataScale = properties.get("oap.benchmark.tpcds.data.scale").get.toInt
     val baseName = format match {
       case "oap" => s"oap_tpcds_$dataScale"
@@ -55,7 +55,7 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
     s"${rootDir}/${versionNum}/tpcds/${getDatabase(tableFormat)}"
   }
 
-  private val properties = new mutable.HashMap[String, String]
+  private val properties = new mutable.HashMap[String, String] ++= defaultProperties
 
   override def beforeAll(conf: Map[String, String] = Map.empty): Unit = {
     super.beforeAll(conf)
@@ -64,11 +64,8 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
         properties(k) = v
       }
     } catch {
-      case e: IllegalArgumentException =>{
+      case e: IllegalArgumentException => {
         println(e.getMessage + ". Use default setting!")
-        defaultProperties.foreach{ case (k, v) =>
-          properties(k) = v
-        }
       }
     }
   }

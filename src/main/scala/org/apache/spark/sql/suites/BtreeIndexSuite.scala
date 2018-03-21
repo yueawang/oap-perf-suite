@@ -30,16 +30,19 @@ object BtreeIndexSuite extends OapTestSuite with OapPerfSuiteContext with Parque
     OapBenchmarkDataBuilder.getDatabase(activeConf.getBenchmarkConf(BenchmarkConfig.FILE_FORMAT))
 
   private def isDataBaseReady: Boolean = {
-    if (spark.sqlContext.sql(s"show databases").collect().exists(_.getString(0) == databaseName)) {
+    val dbCandidates = spark.sqlContext.sql(s"show databases").collect()
+    if (dbCandidates.exists(_.getString(0) == databaseName)) {
       spark.sqlContext.sql(s"USE $databaseName")
       true
     } else {
+      logError(s"$dbCandidates does not contain $databaseName!")
       false
     }
   }
 
   private def isTableReady: Boolean = {
-    if (spark.sqlContext.sql(s"show tables").collect().exists(_.getString(1) == table)) {
+    val tables = spark.sqlContext.sql(s"show tables").collect()
+    if (tables.exists(_.getString(1) == table)) {
       val conf = activeConf
       if (conf.getBenchmarkConf(BenchmarkConfig.INDEX_ENABLE) == "true"){
         // Check if index exists.
@@ -48,6 +51,7 @@ object BtreeIndexSuite extends OapTestSuite with OapPerfSuiteContext with Parque
         true
       }
     } else {
+      logError(s"$tables does not contain $table!")
       false
     }
   }
