@@ -17,16 +17,15 @@
 package org.apache.spark.sql
 
 import com.databricks.spark.sql.perf.tpcds.Tables
-
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, FileUtil, Path}
-
+import org.apache.spark.internal.Logging
 import org.apache.spark.sql.functions._
 import org.apache.spark.util.Utils
 
 import scala.collection.mutable
 
-object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
+object OapBenchmarkDataBuilder extends OapPerfSuiteContext with Logging {
 
   private val defaultProperties = Map(
     "oap.benchmark.compression.codec"     -> "gzip",
@@ -61,7 +60,7 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
         Utils.getPropertiesFromFile("./oap-benchmark-default.conf")
     } catch {
       case e: IllegalArgumentException => {
-        println(e.getMessage + ". Use default setting!")
+        logWarning(e.getMessage + ". Use default setting!")
         defaultProperties
       }
     }
@@ -128,10 +127,10 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
 
       sqlContext.createExternalTable("store_sales", dataLocation + "store_sales", dataFormat)
       sqlContext.createExternalTable("store_sales_dup", dataLocation + "store_sales_dup", dataFormat)
-      println("File size of orignial table store_sales in oap format: " +
+      logWarning("File size of orignial table store_sales in oap format: " +
         TestUtil.calculateFileSize("store_sales", dataLocation, dataFormat)
       )
-      println("Records of table store_sales: " +
+      logWarning("Records of table store_sales: " +
         spark.read.format(dataFormat).load(dataLocation + "store_sales").count()
       )
     }
@@ -144,7 +143,7 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
       try {
         spark.sql(s"DROP OINDEX ${table}_${attr}_index ON $table")
       } catch {
-        case _ => println("Index doesn't exist, so don't need to drop here!")
+        case _: Throwable => logWarning("Index doesn't exist, so don't need to drop here!")
       } finally {
         TestUtil.time(
           spark.sql(
@@ -152,7 +151,7 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
           ),
           s"Create B-Tree index on ${table}(${attr}) cost "
         )
-        println(s"The size of B-Tree index on ${table}(${attr}) cost:" +
+        logWarning(s"The size of B-Tree index on ${table}(${attr}) cost:" +
           TestUtil.calculateIndexSize(table, tablePath, attr))
       }
     }
@@ -161,7 +160,7 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
       try {
         spark.sql(s"DROP OINDEX ${table}_${attr}_index ON $table")
       } catch {
-        case _ => println("Index doesn't exist, so don't need to drop here!")
+        case _: Throwable => logWarning("Index doesn't exist, so don't need to drop here!")
       } finally {
         TestUtil.time(
           spark.sql(
@@ -169,7 +168,7 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
           ),
           s"Create Bitmap index on ${table}(${attr}) cost"
         )
-        println(s"The size of Bitmap index on ${table}(${attr}) cost:" +
+        logWarning(s"The size of Bitmap index on ${table}(${attr}) cost:" +
           TestUtil.calculateIndexSize(table, tablePath, attr))
       }
     }
