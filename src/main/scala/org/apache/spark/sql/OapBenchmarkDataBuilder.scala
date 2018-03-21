@@ -33,9 +33,27 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
     "oap.benchmark.support.oap.version"   -> "0.4.0",
     "oap.benchmark.tpcds.tool.dir"        -> "/home/oap/tpcds-kit/tools",
     "oap.benchmark.hdfs.file.root.dir"    -> "/user/oap/oaptest/",
+    "oap.benchmark.database.prefix"       -> "",
+    "oap.benchmark.database.postfix"       -> "",
     "oap.benchmark.tpcds.data.scale"      -> "200",
     "oap.benchmark.tpcds.data.partition"  -> "80"
   )
+
+  def getDatabase(format: String) : String = {
+    val prefix = properties.get("oap.benchmark.database.prefix")
+    val postfix = properties.get("oap.benchmark.database.postfix")
+    val dataScale = properties.get("oap.benchmark.tpcds.data.scale").get.toInt
+    val baseName = format match {
+      case "oap" => s"oap_tpcds_$dataScale"
+      case "parquet" => s"parquet_tpcds_$dataScale"
+      case _ => "default"
+    }
+    prefix + baseName + postfix
+  }
+
+  def formatTableLocation(rootDir: String, versionNum: String, tableFormat: String): String = {
+    s"${rootDir}/${versionNum}/tpcds/${getDatabase(tableFormat)}"
+  }
 
   private val properties = new mutable.HashMap[String, String]
 
@@ -55,7 +73,7 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
     }
   }
 
-  def generateTables(): Unit = {
+  def generateTables(dataFormats: Array[String] = Array("oap", "parquet")): Unit = {
     val versionNum = properties.get("oap.benchmark.support.oap.version").get
     val codec = properties.get("oap.benchmark.compression.codec").get
     val scale = properties.get("oap.benchmark.tpcds.data.scale").get.toInt
@@ -63,39 +81,28 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
     val hdfsRootDir = properties.get("oap.benchmark.hdfs.file.root.dir").get
     val tpcdsToolPath = properties.get("oap.benchmark.tpcds.tool.dir").get
 
-    spark.sqlContext.setConf("spark.sql.parquet.compression.codec", codec)
-    val tables1 = new Tables(spark.sqlContext, tpcdsToolPath, scale)
-    val oapLoc = s"${hdfsRootDir}/${versionNum}/tpcds/tpcds$scale/oap/"
-    val parquetLoc = s"${hdfsRootDir}/${versionNum}/tpcds/tpcds$scale/parquet/"
-    tables1.genData(
-      oapLoc, "oap", true, false, true, false, false, "store_sales", partitions)
-    // TODO: use copy method to make sure these two are exactly same.
-    tables1.genData(
-      parquetLoc, "parquet", true, false, true, false, false, "store_sales", partitions)
+    sqlContext.setConf("spark.sql.parquet.compression.codec", codec)
+    dataFormats.foreach{ format =>
+      val loc = formatTableLocation(hdfsRootDir, versionNum, getDatabase(format))
+      val tables = new Tables(sqlContext, tpcdsToolPath, scale)
+      tables.genData(
+        loc, format, true, false, true, false, false, "store_sales", partitions)
+    }
   }
 
   def generateDatabases() {
-    val versionNum = properties.get("oap.benchmark.support.oap.version").get
-    val dataScale = properties.get("oap.benchmark.tpcds.data.scale").get.toInt
-    val hdfsRootDir = properties.get("oap.benchmark.hdfs.file.root.dir").get
-
-    // "oap" or "parquet" or "both".
     // TODO: get from OapFileFormatConfigSet
     val dataFormats: Seq[String] = Seq("oap", "parquet")
-
-    val conf = new Configuration()
-    val hadoopFs = FileSystem.get(conf)
-    val spark = SparkSession.builder.appName(s"OAP-Test-${versionNum}.0")
-      .enableHiveSupport().getOrCreate()
-    spark.sqlContext.setConf("spark.sql.parquet.compression.codec", "gzip")
-    val sqlContext = spark.sqlContext
-    val tablePath = s"${hdfsRootDir}/${versionNum}/tpcds/tpcds$dataScale/"
-    spark.sql(s"create database if not exists oap_tpcds_$dataScale")
-    spark.sql(s"create database if not exists parquet_tpcds_$dataScale")
+    dataFormats.foreach { format =>
+      spark.sql(s"create database if not exists ${getDatabase(format)}")
+    }
 
     def genData(dataFormat: String) = {
-      val dataLocation = s"${tablePath}${dataFormat}/"
-      spark.sql(s"use ${dataFormat}_tpcds_${dataScale}")
+      val versionNum = properties.get("oap.benchmark.support.oap.version").get
+      val hdfsRootDir = properties.get("oap.benchmark.hdfs.file.root.dir").get
+      val dataLocation = formatTableLocation(hdfsRootDir, versionNum, dataFormat)
+
+      spark.sql(s"use ${getDatabase(dataFormat)}")
       spark.sql("drop table if exists store_sales")
       spark.sql("drop table if exists store_sales_dup")
 
@@ -110,6 +117,9 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
       val divideUdf = udf((s: Int) => s / divRatio)
       df.withColumn("ss_item_sk1", divideUdf(col("ss_item_sk"))).write.format(dataFormat)
         .mode(SaveMode.Overwrite).save(dataLocation + "store_sales1")
+
+      val conf = new Configuration()
+      val hadoopFs = FileSystem.get(conf)
       hadoopFs.delete(new Path(dataLocation + "store_sales"), true)
 
       // Notice here delete source flag should firstly be set to false
@@ -117,6 +127,7 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
         hadoopFs, new Path(dataLocation + "store_sales"), false, conf)
       FileUtil.copy(hadoopFs, new Path(dataLocation + "store_sales1"),
         hadoopFs, new Path(dataLocation + "store_sales_dup"), true, conf)
+
       sqlContext.createExternalTable("store_sales", dataLocation + "store_sales", dataFormat)
       sqlContext.createExternalTable("store_sales_dup", dataLocation + "store_sales_dup", dataFormat)
       println("File size of orignial table store_sales in oap format: " +
@@ -131,11 +142,6 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
   }
 
   def buildAllIndex() {
-    val versionNum = properties.get("oap.benchmark.support.oap.version").get
-    val dataScale = properties.get("oap.benchmark.tpcds.data.scale").get.toInt
-    val hdfsRootDir = properties.get("oap.benchmark.hdfs.file.root.dir").get
-    val dataFormats: Seq[String] = Seq("oap", "parquet")
-
     def buildBtreeIndex(tablePath: String, table: String, attr: String): Unit = {
       try {
         spark.sql(s"DROP OINDEX ${table}_${attr}_index ON $table")
@@ -170,11 +176,15 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext {
       }
     }
 
+    val versionNum = properties.get("oap.benchmark.support.oap.version").get
+    val hdfsRootDir = properties.get("oap.benchmark.hdfs.file.root.dir").get
+    val dataFormats: Seq[String] = Seq("oap", "parquet")
+
     dataFormats.foreach { dataFormat => {
-        spark.sql(s"USE ${dataFormat}_tpcds_${dataScale}")
-        val tablePath: String = s"$hdfsRootDir/${versionNum}/tpcds/tpcds${dataScale}/${dataFormat}/"
-        buildBtreeIndex(tablePath, "store_sales", "ss_customer_sk")
-        buildBitmapIndex(tablePath, "store_sales", "ss_item_sk1")
+        spark.sql(s"USE ${getDatabase(dataFormat)}")
+        val tableLocation: String = formatTableLocation(hdfsRootDir, versionNum, getDatabase(dataFormat))
+        buildBtreeIndex(tableLocation, "store_sales", "ss_customer_sk")
+        buildBitmapIndex(tableLocation, "store_sales", "ss_item_sk1")
       }
     }
   }

@@ -26,14 +26,8 @@ object BtreeIndexSuite extends OapTestSuite with OapPerfSuiteContext with Parque
 
   val attr = "ss_customer_sk"
 
-  def databaseName = {
-    val conf = activeConf
-    conf.getBenchmarkConf(BenchmarkConfig.FILE_FORMAT) match {
-      case "parquet" => "parquet_tpcds_200"
-      case "oap" => "oap_tpcds_200"
-      case _ => "default"
-    }
-  }
+  def databaseName =
+    OapBenchmarkDataBuilder.getDatabase(activeConf.getBenchmarkConf(BenchmarkConfig.FILE_FORMAT))
 
   private def isDataBaseReady: Boolean = {
     if (spark.sqlContext.sql(s"show databases").collect().exists(_.getString(0) == databaseName)) {

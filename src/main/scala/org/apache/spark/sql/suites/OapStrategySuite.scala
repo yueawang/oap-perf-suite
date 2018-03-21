@@ -16,7 +16,7 @@
  */
 package org.apache.spark.sql.suites
 
-import org.apache.spark.sql.{BenchmarkConfig, OapStrategyConfigSet, OapTestSuite}
+import org.apache.spark.sql.{BenchmarkConfig, OapBenchmarkDataBuilder, OapStrategyConfigSet, OapTestSuite}
 import org.apache.spark.sql.execution.datasources.oap.OapStrategies
 import org.apache.spark.sql.internal.oap.OapConf
 
@@ -32,14 +32,8 @@ object OapStrategySuite extends OapTestSuite with OapStrategyConfigSet with OapS
     super.afterAll()
   }
 
-  private def databaseName = {
-    val conf = activeConf
-    conf.getBenchmarkConf(BenchmarkConfig.FILE_FORMAT) match {
-      case "parquet" => "parquet_tpcds_200"
-      case "oap" => "oap_tpcds_200"
-      case _ => "default"
-    }
-  }
+  private def databaseName =
+    OapBenchmarkDataBuilder.getDatabase(activeConf.getBenchmarkConf(BenchmarkConfig.FILE_FORMAT))
 
   private def isDataBaseExists: Boolean = {
     if (spark.sqlContext.sql(s"show databases").collect().exists(_.getString(0) == databaseName)) {
