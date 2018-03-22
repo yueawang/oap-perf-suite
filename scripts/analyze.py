@@ -35,12 +35,11 @@ def parseFile(fileName):
 
 if __name__ == '__main__':
     args = sys.argv
-    if(len(args) != 4):
+    if(len(args) < 4):
         exit(1)
-    resOld = parseFile(args[1])
-    resNew = parseFile(args[2])
-    baseNameOld = os.path.basename(args[1])[8:]
-    baseNameNew = os.path.basename(args[2])[8:]
+    resOldList = [parseFile(args[i]) for i in range(1, len(args) - 2)]
+    resNew = parseFile(args[-2])
+    baseNameList = [os.path.basename(args[i])[8:] for i in range(1, len(args) - 1)]
     htmlContent = """
     <!DOCTYPE html>
     <html>
@@ -65,47 +64,50 @@ if __name__ == '__main__':
     </html>
     """
     htmlTables = ""
+    cellFormat = """<td class="tg-yw4l">{}</td>\n"""
+    colorFormat = """<td class="tg-ahyg">Yes</td>\n"""
     for suite, suiteRes in resNew.items():
-        suiteTable = ""
-        if(suite in resOld):
-            suiteTable += """<table class="tg">\n"""
-            suiteTable += """<tr>\n<th class="tg-baqh">{}</th>\n<th class="tg-yw4l">Config</th>
-                                <th class="tg-lqy6">Result of {}/ms</th>
-                                <th class="tg-yw4l">Result of {}/ms</th>
-                                <th class="tg-yw4l">Regression</th>
-                             </tr>\n""".format(suite, os.path.basename(args[1])[8:], os.path.basename(args[2])[8:])
-            for case, caseRes in suiteRes.items():
-                configNums = len(caseRes)
-                j = 0
-                odRes = collections.OrderedDict(sorted(caseRes.items()))
-                for config, median in odRes.items():
-                    if(j == 0):
-                        suiteTable += """<tr>\n<td class="tg-yw4l" rowspan="{}">{}</td>\n""".format(configNums, case)
-                        suiteTable +=  """<td class="tg-yw4l">{}</td>\n""".format(config)
+        suiteTable = """<table class="tg">\n"""
+        suiteTable += """<tr>\n<th class="tg-baqh">{}</th>\n<th class="tg-yw4l">Config</th>\n""".format(suite)
+        for baseName in baseNameList:
+            suiteTable += """<th class="tg-yw41">Result of {}/ms</th>\n""".format(baseName)
+        suiteTable += """<th class="tg-yw4l">Regression</th></tr>\n"""
+        for case, caseRes in suiteRes.items():
+            configNums = len(caseRes)
+            j = 0
+            odRes = collections.OrderedDict(sorted(caseRes.items()))
+            for config, median in odRes.items():
+                if(j == 0):
+                    suiteTable += """<tr>\n<td class="tg-yw4l" rowspan="{}">{}</td>\n""".format(configNums, case)
+                    suiteTable +=  """<td class="tg-yw4l">{}</td>\n""".format(config)
+                else:
+                    suiteTable += """<tr>\n<td class="tg-yw4l">{}</td>\n""".format(config)
+                # currently we just compare with last day and present the others as history data for better judgement
+                for res in resOldList:
+                    if(suite in res and case in res[suite] and config in res[suite][case]):
+                        suiteTable += cellFormat.format(res[suite][case][config])
                     else:
-                        suiteTable += """<tr>\n<td class="tg-yw4l">{}</td>\n""".format(config)
-                    if(case in resOld[suite] and config in resOld[suite][case]):
-                        suiteTable += """<td class="tg-lqy6">{}</td>\n""".format(resOld[suite][case][config])
-                        suiteTable += """<td class="tg-yw4l">{}</td>\n""".format(median)
-                        if(median > resOld[suite][case][config]):
-                            if(resOld[suite][case][config] != 0):
-                                per = (median - resOld[suite][case][config]) * 1.0 / resOld[suite][case][config]
-                                if(per <= 0.15):
-                                    suiteTable += """<td class="tg-yw41">No</td>\n"""
-                                else:
-                                    suiteTable += """<td class="tg-ahyg">Yes</td>\n"""
+                        suiteTable += cellFormat.format("N/A")
+                resLastday = resOldList[-1]
+                suiteTable += cellFormat.format(median)
+                if(suite in resLastday and case in resLastday[suite] and config in resLastday[suite][case]):
+                    if(median > resLastday[suite][case][config]):
+                        if(resLastday[suite][case][config] != 0):
+                            per = (median - resLastday[suite][case][config]) * 1.0 / resLastday[suite][case][config]
+                            if(per <= 0.15):
+                                suiteTable += cellFormat.format("No")
                             else:
-                                suiteTable += """<td class="tg-ahyg">Yes</td>\n"""
+                                suiteTable += colorFormat
                         else:
-                            suiteTable += """<td class="tg-yw41">No</td>\n"""
+                            suiteTable += colorFormat
                     else:
-                        suiteTable += """<td class="tg-lqy6">{}</td>\n""".format("N/A")
-                        suiteTable += """<td class="tg-yw4l">{}</td>\n""".format(median)
-                        suiteTable += """<td class="tg-yw4l">N/A</td>\n"""
-                    suiteTable += "</tr>\n"
-                    j += 1
-            suiteTable += "</table>\n"
-            htmlTables += "\n{}\n".format(suiteTable)
-    cmpFile = open(args[3], mode='w')
-    cmpFile.write(htmlContent.format("sr530:" + os.path.abspath(args[1]), "sr530:" + os.path.abspath(args[2]), htmlTables))
+                        suiteTable += cellFormat.format("No")
+                else:
+                    suiteTable += cellFormat.format("N/A")
+                suiteTable += "</tr>\n"
+                j += 1
+        suiteTable += "</table>\n"
+        htmlTables += "\n{}\n".format(suiteTable)
+    cmpFile = open(args[-1], mode='w')
+    cmpFile.write(htmlContent.format("sr530:" + os.path.abspath(args[-3]), "sr530:" + os.path.abspath(args[-2]), htmlTables))
     cmpFile.close()

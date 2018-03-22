@@ -103,18 +103,22 @@ function main {
         [ $fail = "false" ] && runTask
         if [ "$?" -ne 0 ]; then fail="true"; fi
         if [ $fail = "true" ]; then
-            echo -e "Hello guys, daily test fails due to following reason. Details:\n"`cat ${workDir}/${resDir}/testlog` | \
+            echo -e "Hello guys, daily test fails due to following reason. Details:\n""$(cat ${workDir}/${resDir}/testlog)" | \
                 mutt -s "$mailTitle" ${mailList[@]}
         else
             lastPath=${workDir}/last_test_info
             [ -f $lastPath ] && . $lastPath
             todayPath=${workDir}/${resDir}/testres_${today}
-            if [ -n "$lastResPath" ]; then
-                python ${workDir}/analyze.py $lastResPath $todayPath ${workDir}/${resDir}/cmp.html
+            if [ ${#lastResPath[@]} -gt 0 ]; then
+                python ${workDir}/analyze.py ${lastResPath[@]} $todayPath ${workDir}/${resDir}/cmp.html
             else
                 python ${workDir}/analyze.py $todayPath $todayPath ${workDir}/${resDir}/cmp.html
             fi
-            echo "lastResPath=${todayPath}" > $lastPath
+            lastResPath+=($todayPath)
+            if [ ${#lastResPath[@]} -gt 3 ]; then 
+                lastResPath=("${lastResPath[@]/${lastResPath[0]}}")
+            fi
+            echo "lastResPath=(${lastResPath[@]})" > $lastPath
             mutt -e "set content_type=text/html" -s "$mailTitle" ${mailList[@]} < ${workDir}/${resDir}/cmp.html
         fi
     elif [ -n "$1" ] && [ "$1" = "--rerun" ]; then
@@ -124,25 +128,29 @@ function main {
         while [ -d ${today}_$i ]; do (( i++ )); done
         resDir=${today}_$i
         mkdir $resDir && cd $resDir
-        exec 3>./testlog
+        exec 3>/dev/null
+        exec 3>&1
         fail="false"
         sourceEnv
         if [ "$?" -ne 0 ]; then fail="true"; fi
         [ $fail = "false" ] && runTask
         if [ "$?" -ne 0 ]; then fail="true"; fi
         if [ $fail = "true" ]; then
-            cat ${workDir}/${resDir}/testlog
             exit 1
         else
             lastPath=${workDir}/last_test_info
             [ -f $lastPath ] && . $lastPath
             todayPath=${workDir}/${resDir}/testres_${today}
-            if [ -n "$lastResPath" ]; then
-                python ${workDir}/analyze.py $lastResPath $todayPath ${workDir}/${resDir}/cmp.html
+            if [ ${#lastResPath[@]} -gt 0 ]; then
+                python ${workDir}/analyze.py ${lastResPath[@]} $todayPath ${workDir}/${resDir}/cmp.html
             else
                 python ${workDir}/analyze.py $todayPath $todayPath ${workDir}/${resDir}/cmp.html
             fi
-            echo "lastResPath=${todayPath}" > $lastPath
+            lastResPath+=($todayPath)
+            if [ ${#lastResPath[@]} -gt 3 ]; then
+                lastResPath=("${lastResPath[@]/${lastResPath[0]}}")
+            fi
+            echo "lastResPath=(${lastResPath[@]})" > $lastPath
         fi
     else
         exec 3>/dev/null
