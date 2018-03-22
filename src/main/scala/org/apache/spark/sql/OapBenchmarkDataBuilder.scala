@@ -58,7 +58,7 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext with Logging {
   private val properties = {
     try {
       new mutable.HashMap[String, String]() ++=
-        Utils.getPropertiesFromFile("./oap-benchmark-default.conf")
+        Utils.getPropertiesFromFile("./conf/oap-benchmark-default.conf")
     } catch {
       case e: IllegalArgumentException => {
         logWarning(e.getMessage + ". Use default setting!")
@@ -128,7 +128,7 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext with Logging {
 
       sqlContext.createExternalTable("store_sales", dataLocation + "store_sales", dataFormat)
       sqlContext.createExternalTable("store_sales_dup", dataLocation + "store_sales_dup", dataFormat)
-      logWarning("File size of orignial table store_sales in oap format: " +
+      logWarning(s"File size of original table store_sales in $dataFormats format: " +
         TestUtil.calculateFileSize("store_sales", dataLocation, dataFormat)
       )
       logWarning("Records of table store_sales: " +
