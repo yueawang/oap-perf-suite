@@ -216,6 +216,21 @@ trait OapStrategyConfigSet extends BenchmarkConfigSelector{
   )
 }
 
+trait CacheMissConfigSet extends BenchmarkConfigSelector {
+  def allConfigurations: Seq[BenchmarkConfig] = Seq(
+    new BenchmarkConfig()
+      .setBenchmarkConfName("offheap memory only")
+      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
+      .setSparkConf("spark.memory.offHeap.enabled", "true")
+      .setSparkConf("spark.memory.offHeap.size", "10g")
+      .setSqlConf("spark.sql.oap.oindex.eis.enabled", "false"),
+    new BenchmarkConfig()
+      .setBenchmarkConfName("no offheap used")
+      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
+      .setSparkConf("spark.memory.offHeap.enabled", "false")
+      .setSqlConf("spark.sql.oap.oindex.eis.enabled", "false")
+  )
+}
 trait LocalClusterConfigSet extends BenchmarkConfigSelector {
   // TODO: choose conf
   def allConfigurations: Seq[BenchmarkConfig] = Seq(
