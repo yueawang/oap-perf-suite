@@ -227,17 +227,17 @@ trait CacheMissConfigSet extends BenchmarkConfigSelector {
     // TODO: Here this config does not work because in local
     // mode, MemoryManager initialization do only once as it
     // is a object. 
-    new BenchmarkConfig()
-      .setBenchmarkConfName("executor cache onheap [(50+30), 0, 0]")
-      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
-      .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "false")
-      .setSparkConf("spark.executor.memory", "80g")
-      .setSparkConf("spark.memory.offHeap.enabled", "true")
-      .setSparkConf("spark.memory.offHeap.size", "10g")
-      .setSparkConf("spark.yarn.executor.memoryOverhead", "10g")
-      .setSparkConf("spark.sql.oap.onheap.enable", "true")
-      .setSparkConf("spark.sql.oap.onheap.size", "30g")
-    ,
+//    new BenchmarkConfig()
+//      .setBenchmarkConfName("executor cache onheap [(50+30), 0, 0]")
+//      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
+//      .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "false")
+//      .setSparkConf("spark.executor.memory", "80g")
+//      .setSparkConf("spark.memory.offHeap.enabled", "true")
+//      .setSparkConf("spark.memory.offHeap.size", "10g")
+//      .setSparkConf("spark.yarn.executor.memoryOverhead", "10g")
+//      .setSparkConf("spark.sql.oap.onheap.enable", "true")
+//      .setSparkConf("spark.sql.oap.onheap.size", "30g")
+//    ,
     new BenchmarkConfig()
       .setBenchmarkConfName("executor cache on aep [80, 0, 500]")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
