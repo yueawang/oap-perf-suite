@@ -217,49 +217,37 @@ trait OapStrategyConfigSet extends BenchmarkConfigSelector{
 }
 
 trait CacheMissConfigSet extends BenchmarkConfigSelector {
-  def allConfigurations: Seq[BenchmarkConfig] = Seq(
-    new BenchmarkConfig()
-      .setBenchmarkConfName("offheap memory only")
-      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
-      .setSparkConf("spark.memory.offHeap.enabled", "true")
-      .setSparkConf("spark.memory.offHeap.size", "10g")
-      .setSqlConf("spark.sql.oap.oindex.eis.enabled", "false"),
-    new BenchmarkConfig()
-      .setBenchmarkConfName("no offheap used")
-      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
-      .setSparkConf("spark.memory.offHeap.enabled", "false")
-      .setSqlConf("spark.sql.oap.oindex.eis.enabled", "false")
-  )
-}
-trait LocalClusterConfigSet extends BenchmarkConfigSelector {
   // TODO: choose conf
   def allConfigurations: Seq[BenchmarkConfig] = Seq(
     new BenchmarkConfig()
-      .setBenchmarkConfName("local cluster 100m offheap")
+      .setBenchmarkConfName("executor default [50, 30, 0]")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
-      .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
-      .setSparkConf("spark.memory.offHeap.enabled", "true")
-      .setSparkConf("spark.memory.offHeap.size", "100m")
+      .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "false")
+    ,
     // TODO: Here this config does not work because in local
     // mode, MemoryManager initialization do only once as it
     // is a object. 
-//    new BenchmarkConfig()
-//      .setBenchmarkConfName("executor on/off heap: 100/0")
-//      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
-//      .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
-//      .setSparkConf("spark.memory.offHeap.enabled", "true")
-//      .setSparkConf("spark.yarn.executor.memoryOverhead", "1g")
-//      .setSparkConf("spark.executor.memory", "100g")
-//      .setSparkConf("spark.sql.oap.offheap.enable", "false")
-//    ,
-//    new BenchmarkConfig()
-//      .setBenchmarkConfName("executor on/off heap: 100+10/0")
-//      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
-//      .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
-//      .setSparkConf("spark.memory.offHeap.enabled", "true")
-//      .setSparkConf("spark.yarn.executor.memoryOverhead", "1g")
-//      .setSparkConf("spark.executor.memory", "110g")
-//      .setSparkConf("spark.sql.oap.onheap.size", "10g")
-//      .setSparkConf("spark.sql.oap.offheap.enable", "false")
+    new BenchmarkConfig()
+      .setBenchmarkConfName("executor cache onheap [(50+30), 0, 0]")
+      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
+      .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "false")
+      .setSparkConf("spark.executor.memory", "80g")
+      .setSparkConf("spark.memory.offHeap.enabled", "true")
+      .setSparkConf("spark.memory.offHeap.size", "10g")
+      .setSparkConf("spark.yarn.executor.memoryOverhead", "10g")
+      .setSparkConf("spark.sql.oap.onheap.enable", "true")
+      .setSparkConf("spark.sql.oap.onheap.size", "30g")
+    ,
+    new BenchmarkConfig()
+      .setBenchmarkConfName("executor cache on aep [80, 0, 500]")
+      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
+      .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "false")
+      .setSparkConf("spark.memory.offHeap.enabled", "false")
+      .setSparkConf("spark.yarn.executor.memoryOverhead", "1g")
+      .setSparkConf("spark.executor.memory", "80g")
+      .setSparkConf("spark.memory.offHeap.size", "10g")
+      .setSparkConf("spark.yarn.executor.memoryOverhead", "10g")
+      .setSparkConf("spark.sql.oap.aep.allocator.enabled", "true")
+      .setSparkConf("spark.sql.oap.aep.allocator.size", "500g")
   )
 }

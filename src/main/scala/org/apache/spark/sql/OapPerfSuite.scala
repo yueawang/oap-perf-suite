@@ -108,7 +108,7 @@ object OapPerfSuite extends Logging {
           OapBenchmarkDataBuilder.beforeAll()
           OapBenchmarkDataBuilder.generateTables()
           OapBenchmarkDataBuilder.generateDatabases()
-          OapBenchmarkDataBuilder.buildAllIndex()
+          // OapBenchmarkDataBuilder.buildAllIndex()
           OapBenchmarkDataBuilder.afterAll()
           // if run with -d only
           if(i == 0 && args.length == 1){
