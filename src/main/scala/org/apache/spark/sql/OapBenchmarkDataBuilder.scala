@@ -79,8 +79,8 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext with Logging {
     val hdfsRootDir = properties.get("oap.benchmark.hdfs.file.root.dir").get
     val tpcdsToolPath = properties.get("oap.benchmark.tpcds.tool.dir").get
 
-    sqlContext.setConf("spark.sql.parquet.compression.codec", codec)
     dataFormats.foreach{ format =>
+      sqlContext.setConf(s"spark.sql.$format.compression.codec", codec)
       val loc = formatTableLocation(hdfsRootDir, versionNum, format)
       val tables = new Tables(sqlContext, tpcdsToolPath, scale)
       tables.genData(
