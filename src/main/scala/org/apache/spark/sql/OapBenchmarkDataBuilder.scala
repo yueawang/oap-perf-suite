@@ -93,50 +93,54 @@ object OapBenchmarkDataBuilder extends OapPerfSuiteContext with Logging {
     val dataFormats: Seq[String] = Seq("oap", "parquet")
     dataFormats.foreach { format =>
       spark.sql(s"create database if not exists ${getDatabase(format)}")
-    }
-
-    def genData(dataFormat: String) = {
       val versionNum = properties.get("oap.benchmark.support.oap.version").get
       val hdfsRootDir = properties.get("oap.benchmark.hdfs.file.root.dir").get
-      val dataLocation = formatTableLocation(hdfsRootDir, versionNum, dataFormat)
-
-      spark.sql(s"use ${getDatabase(dataFormat)}")
-      spark.sql("drop table if exists store_sales")
-      spark.sql("drop table if exists store_sales_dup")
-
-      /**
-       * To compare performance between B-Tree and Bitmap index, we generate duplicate
-       * tables of store_sales here. Besides, store_sales_dup table can be used in testing
-       * OAP strategies.
-       */
-      val df = spark.read.format(dataFormat).load(dataLocation + "store_sales")
-      val divRatio = df.select("ss_item_sk").orderBy(desc("ss_item_sk")).limit(1).
-        collect()(0)(0).asInstanceOf[Int] / 1000
-      val divideUdf = udf((s: Int) => s / divRatio)
-      df.withColumn("ss_item_sk1", divideUdf(col("ss_item_sk"))).write.format(dataFormat)
-        .mode(SaveMode.Overwrite).save(dataLocation + "store_sales1")
-
-      val conf = new Configuration()
-      val hadoopFs = FileSystem.get(conf)
-      hadoopFs.delete(new Path(dataLocation + "store_sales"), true)
-
-      // Notice here delete source flag should firstly be set to false
-      FileUtil.copy(hadoopFs, new Path(dataLocation + "store_sales1"),
-        hadoopFs, new Path(dataLocation + "store_sales"), false, conf)
-      FileUtil.copy(hadoopFs, new Path(dataLocation + "store_sales1"),
-        hadoopFs, new Path(dataLocation + "store_sales_dup"), true, conf)
-
-      sqlContext.createExternalTable("store_sales", dataLocation + "store_sales", dataFormat)
-      sqlContext.createExternalTable("store_sales_dup", dataLocation + "store_sales_dup", dataFormat)
-      logWarning(s"File size of original table store_sales in $dataFormats format: " +
-        TestUtil.calculateFileSize("store_sales", dataLocation, dataFormat)
-      )
-      logWarning("Records of table store_sales: " +
-        spark.read.format(dataFormat).load(dataLocation + "store_sales").count()
-      )
+      val dataLocation = formatTableLocation(hdfsRootDir, versionNum, format)
+      spark.sqlContext.createExternalTable("store_sales", dataLocation + "store_sales", format)
     }
 
-    dataFormats.foreach(genData)
+//    def genData(dataFormat: String) = {
+//      val versionNum = properties.get("oap.benchmark.support.oap.version").get
+//      val hdfsRootDir = properties.get("oap.benchmark.hdfs.file.root.dir").get
+//      val dataLocation = formatTableLocation(hdfsRootDir, versionNum, dataFormat)
+//
+//      spark.sql(s"use ${getDatabase(dataFormat)}")
+//      spark.sql("drop table if exists store_sales")
+//      spark.sql("drop table if exists store_sales_dup")
+//
+//      /**
+//       * To compare performance between B-Tree and Bitmap index, we generate duplicate
+//       * tables of store_sales here. Besides, store_sales_dup table can be used in testing
+//       * OAP strategies.
+//       */
+//      val df = spark.read.format(dataFormat).load(dataLocation + "store_sales")
+//      val divRatio = df.select("ss_item_sk").orderBy(desc("ss_item_sk")).limit(1).
+//        collect()(0)(0).asInstanceOf[Int] / 1000
+//      val divideUdf = udf((s: Int) => s / divRatio)
+//      df.withColumn("ss_item_sk1", divideUdf(col("ss_item_sk"))).write.format(dataFormat)
+//        .mode(SaveMode.Overwrite).save(dataLocation + "store_sales1")
+//
+//      val conf = new Configuration()
+//      val hadoopFs = FileSystem.get(conf)
+//      hadoopFs.delete(new Path(dataLocation + "store_sales"), true)
+//
+//      // Notice here delete source flag should firstly be set to false
+//      FileUtil.copy(hadoopFs, new Path(dataLocation + "store_sales1"),
+//        hadoopFs, new Path(dataLocation + "store_sales"), false, conf)
+//      FileUtil.copy(hadoopFs, new Path(dataLocation + "store_sales1"),
+//        hadoopFs, new Path(dataLocation + "store_sales_dup"), true, conf)
+//
+//      sqlContext.createExternalTable("store_sales", dataLocation + "store_sales", dataFormat)
+//      sqlContext.createExternalTable("store_sales_dup", dataLocation + "store_sales_dup", dataFormat)
+//      logWarning(s"File size of original table store_sales in $dataFormats format: " +
+//        TestUtil.calculateFileSize("store_sales", dataLocation, dataFormat)
+//      )
+//      logWarning("Records of table store_sales: " +
+//        spark.read.format(dataFormat).load(dataLocation + "store_sales").count()
+//      )
+//    }
+//
+//    dataFormats.foreach(genData)
   }
 
   def buildAllIndex() {

@@ -22,7 +22,7 @@ package org.apache.spark.sql
 
 import scala.reflect.runtime.universe
 import org.apache.spark.internal.Logging
-import org.apache.spark.sql.suites.LocalSparkMasterTestSuite
+import org.apache.spark.sql.suites.{CacheMissSuite, LocalSparkMasterTestSuite}
 import org.reflections.Reflections
 
 import scala.collection.mutable
@@ -128,7 +128,7 @@ object OapPerfSuite extends Logging {
       }
     }
 
-    BenchmarkSuiteSelector.selectedSuites().foreach{suite => runSuite(suite, repeat)}
+    runSuite(CacheMissSuite, repeat)
   }
 
   /**
