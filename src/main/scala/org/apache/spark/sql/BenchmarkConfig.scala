@@ -188,13 +188,23 @@ trait ParquetVsOapConfigSet extends BenchmarkConfigSelector{
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "false"),
     new BenchmarkConfig()
-      .setBenchmarkConfName("parquet w/ index")
+      .setBenchmarkConfName("parquet w/ index oap cache disabled")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "parquet")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true"),
     new BenchmarkConfig()
-      .setBenchmarkConfName("parquet w/o index")
+      .setBenchmarkConfName("parquet w/ index oap cache enabled")
+      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "parquet")
+      .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
+      .setSqlConf("spark.sql.oap.parquet.data.cache.enable", "true"),
+    new BenchmarkConfig()
+      .setBenchmarkConfName("parquet w/o index oap cache disabled")
+      .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "parquet")
+      .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "false"),
+    new BenchmarkConfig()
+      .setBenchmarkConfName("parquet w/o index oap cache enabled")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "parquet")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "false")
+      .setSqlConf("spark.sql.oap.parquet.data.cache.enable", "true")
   )
 }
 
