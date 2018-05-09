@@ -79,7 +79,7 @@ object OapStrategySuite extends OapTestSuite with OapStrategyConfigSet with OapS
       spark.sqlContext.conf.setConf(OapConf.OAP_ENABLE_OINDEX, false)
     }
 
-    conf.allSqlOptions().foreach{ setting =>
+    conf.allSparkOptions().foreach{ setting =>
       spark.sqlContext.setConf(setting._1, setting._2)
     }
 

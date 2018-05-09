@@ -23,9 +23,6 @@ class BenchmarkConfig {
   // Benchmark config, include file format, index use or not, etc.
   private val benchmarkConf: mutable.HashMap[String, String] = mutable.HashMap.empty
 
-  // SQLConf, send to Spark to change the sql query behavior.
-  private val sqlConf: mutable.HashMap[String, String] = mutable.HashMap.empty
-
   // Spark conf, to initial spark session.
   private val sparkConf: mutable.HashMap[String, String] = mutable.HashMap.empty
 
@@ -44,11 +41,6 @@ class BenchmarkConfig {
 
   var confName: Option[String] = None
 
-  def setSqlConf(name: String, value: String): BenchmarkConfig = {
-    sqlConf.put(name, value)
-    this
-  }
-
   def setSparkConf(name: String, value: String): BenchmarkConfig = {
     sparkConf.put(name, value)
     this
@@ -59,9 +51,8 @@ class BenchmarkConfig {
    */
   def getConf(name: String): String = {
     benchmarkConf.get(name).getOrElse(
-      sqlConf.get(name).getOrElse(
-        sparkConf.get(name).getOrElse(
-          s"$name Not Exist!!!")))
+      sparkConf.get(name).getOrElse(
+        s"$name Not Exist!!!"))
   }
 
   /**
@@ -72,24 +63,11 @@ class BenchmarkConfig {
   def getBenchmarkConf(name: String): String = benchmarkConf.getOrElse(name, "false")
 
   /**
-   * Get sql config
-   * @param name: name
-   * @return sql config setting.
-   */
-  def getSqlConf(name: String): String = sqlConf.getOrElse(name, "false")
-
-  /**
    * Get spark config
    * @param name: name
    * @return sql config setting.
    */
   def getSparkConf(name: String): String = sparkConf.getOrElse(name, "false")
-
-  /**
-   * Get all sql config
-   * @return all sql config settings.
-   */
-  def allSqlOptions(): Map[String, String] = sqlConf.toMap[String, String]
 
   /**
    * Get all spark config
@@ -102,7 +80,7 @@ class BenchmarkConfig {
    * @return
    */
   def configString: String = {
-    if (sqlConf.isEmpty) {
+    if (sparkConf.isEmpty) {
       val indexEnable = if (getBenchmarkConf(BenchmarkConfig.INDEX_ENABLE).toBoolean) {
         "W/ Index"
       } else {
@@ -113,7 +91,7 @@ class BenchmarkConfig {
     } else {
       // oap !eis & statistics
       getBenchmarkConf(BenchmarkConfig.FILE_FORMAT) + " "
-      sqlConf.toArray.map{ setting =>
+      sparkConf.toArray.map{ setting =>
         val flag = if (setting._2 == "true") {
           ""
         } else {
@@ -195,7 +173,7 @@ trait ParquetVsOapConfigSet extends BenchmarkConfigSelector{
       .setBenchmarkConfName("parquet w/ index oap cache enabled")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "parquet")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
-      .setSqlConf("spark.sql.oap.parquet.data.cache.enable", "true"),
+      .setSparkConf("spark.sql.oap.parquet.data.cache.enable", "true"),
     new BenchmarkConfig()
       .setBenchmarkConfName("parquet w/o index oap cache disabled")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "parquet")
@@ -204,7 +182,7 @@ trait ParquetVsOapConfigSet extends BenchmarkConfigSelector{
       .setBenchmarkConfName("parquet w/o index oap cache enabled")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "parquet")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "false")
-      .setSqlConf("spark.sql.oap.parquet.data.cache.enable", "true")
+      .setSparkConf("spark.sql.oap.parquet.data.cache.enable", "true")
   )
 }
 
@@ -215,14 +193,14 @@ trait OapStrategyConfigSet extends BenchmarkConfigSelector{
       .setBenchmarkConfName("oapStrategy enabled")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
-      .setSqlConf("spark.sql.oap.oindex.eis.enabled", "false")
-      .setSqlConf("spark.sql.oap.strategies.enabled", "true"),
+      .setSparkConf("spark.sql.oap.oindex.eis.enabled", "false")
+      .setSparkConf("spark.sql.oap.strategies.enabled", "true"),
     new BenchmarkConfig()
       .setBenchmarkConfName("oapStrategy disabled")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
       .setBenchmarkConf(BenchmarkConfig.INDEX_ENABLE, "true")
-      .setSqlConf("spark.sql.oap.oindex.eis.enabled", "true")
-      .setSqlConf("spark.sql.oap.strategies.enabled", "false")
+      .setSparkConf("spark.sql.oap.oindex.eis.enabled", "true")
+      .setSparkConf("spark.sql.oap.strategies.enabled", "false")
   )
 }
 
@@ -233,12 +211,12 @@ trait CacheMissConfigSet extends BenchmarkConfigSelector {
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
       .setSparkConf("spark.memory.offHeap.enabled", "true")
       .setSparkConf("spark.memory.offHeap.size", "10g")
-      .setSqlConf("spark.sql.oap.oindex.eis.enabled", "false"),
+      .setSparkConf("spark.sql.oap.oindex.eis.enabled", "false"),
     new BenchmarkConfig()
       .setBenchmarkConfName("no offheap used")
       .setBenchmarkConf(BenchmarkConfig.FILE_FORMAT, "oap")
       .setSparkConf("spark.memory.offHeap.enabled", "false")
-      .setSqlConf("spark.sql.oap.oindex.eis.enabled", "false")
+      .setSparkConf("spark.sql.oap.oindex.eis.enabled", "false")
   )
 }
 trait LocalClusterConfigSet extends BenchmarkConfigSelector {

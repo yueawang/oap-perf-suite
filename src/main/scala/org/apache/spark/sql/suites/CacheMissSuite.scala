@@ -44,7 +44,7 @@ object CacheMissSuite extends OapTestSuite with CacheMissConfigSet {
 
   private def setRunningParams(): Boolean = {
     val conf = activeConf
-    conf.allSqlOptions().foreach{ setting =>
+    conf.allSparkOptions().foreach{ setting =>
       spark.sqlContext.setConf(setting._1, setting._2)
     }
     spark.sqlContext.sql(s"USE $databaseName")
