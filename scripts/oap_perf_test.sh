@@ -5,7 +5,7 @@ jarPath=/home/oap/oap
 OAP_HOME=/home/oap
 scriptName=$(basename $BASH_SOURCE)
 workDir=`cd ${BASH_SOURCE%/*}; pwd`
-mailList=(yang2.xu@intel.com yue.a.wang@intel.com carson.wang@intel.com hao.cheng@intel.com daoyuan.wang@intel.com linhong.liu@intel.com lei.l.li@intel.com chenzhao.guo@intel.com yi.cui@intel.com)
+mailList=(wei4.zhang@intel.com yang2.xu@intel.com yue.a.wang@intel.com carson.wang@intel.com hao.cheng@intel.com daoyuan.wang@intel.com linhong.liu@intel.com lei.l.li@intel.com chenzhao.guo@intel.com yi.cui@intel.com)
 
 # source environment variables and check requirements
 function sourceEnv {
@@ -39,7 +39,7 @@ function checkCrontab {
 function cloneAndBuild {
     # git clone OAP and oap-perf-suite
     git clone -q https://github.com/Intel-bigdata/OAP.git
-    git clone -q https://github.com/yueawang/oap-perf-suite.git
+    git clone -q --branch ${branch} https://github.com/yueawang/oap-perf-suite.git
     if ! [ -d OAP ] || ! [ -d oap-perf-suite ]; then
         echo "Git clone OAP or oap-perf-suite fails!" >&3 && return 1
     fi
@@ -86,19 +86,66 @@ function runTask {
     2>&3
 }
 
+function beforeRun {
+    cd $workDir
+    today=$(date +%Y_%m_%d)
+    i=0
+    while [ -d ${today}_$i ]; do (( i++ )); done
+    resDir=${today}_$i
+    mkdir $resDir && cd $resDir
+    fail="false"
+    sourceEnv
+}
+
+function afterRun {
+    lastPath=${workDir}/last_test_info
+    [ -f $lastPath ] && . $lastPath
+    todayPath=${workDir}/${resDir}/testres_${today}
+    if [ ${#lastResPath[@]} -gt 0 ]; then
+        python ${workDir}/analyze.py ${lastResPath[@]} $todayPath ${workDir}/${resDir}/cmp.html
+    else
+        python ${workDir}/analyze.py $todayPath $todayPath ${workDir}/${resDir}/cmp.html
+    fi
+    lastResPath+=($todayPath)
+    if [ ${#lastResPath[@]} -gt 3 ]; then
+        lastResPath=("${lastResPath[@]/${lastResPath[0]}}")
+    fi
+    echo "lastResPath=(${lastResPath[@]})" > $lastPath
+}
+
 function main {
     # use -c option to check if called by cron or bash
-    if [ -n "$1" ] && [ "$1" = "-c" ]; then
-        cd $workDir
-        today=$(date +%Y_%m_%d)
+    args=`getopt -a -o crb:g -l cron,rerun,branch:,gen -- "$@"`
+    eval set -- "${args}"
+    runType=""
+    branch="master"
+    while true
+    do
+        case "$1" in
+        -c|--cron)
+	    runType="cron"
+	    ;;
+        -r|--rerun)
+	    runType="rerun"
+	    ;;
+        -b|--branch)
+	    branch="$2"
+	    shift
+	    ;;
+	-g|--gen)
+	    runType="gen"
+	    ;;
+        --)
+	    shift
+	    break
+	    ;;
+	esac
+    shift
+    done
+    if [ "${runType}" = "cron" ]; then
+	beforeRun
         mailTitle="Oap Benchmark Reporter"
-        i=0
-        while [ -d ${today}_$i ]; do (( i++ )); done
-        resDir=${today}_$i
-        mkdir $resDir && cd $resDir
         exec 3>./testlog
-        fail="false"
-        sourceEnv
         if [ "$?" -ne 0 ]; then fail="true"; fi
         [ $fail = "false" ] && runTask
         if [ "$?" -ne 0 ]; then fail="true"; fi
@@ -106,64 +153,31 @@ function main {
             echo -e "Hello guys, daily test fails due to following reason. Details:\n""$(cat ${workDir}/${resDir}/testlog)" | \
                 mutt -s "$mailTitle" ${mailList[@]}
         else
-            lastPath=${workDir}/last_test_info
-            [ -f $lastPath ] && . $lastPath
-            todayPath=${workDir}/${resDir}/testres_${today}
-            if [ ${#lastResPath[@]} -gt 0 ]; then
-                python ${workDir}/analyze.py ${lastResPath[@]} $todayPath ${workDir}/${resDir}/cmp.html
-            else
-                python ${workDir}/analyze.py $todayPath $todayPath ${workDir}/${resDir}/cmp.html
-            fi
-            lastResPath+=($todayPath)
-            if [ ${#lastResPath[@]} -gt 3 ]; then 
-                lastResPath=("${lastResPath[@]/${lastResPath[0]}}")
-            fi
-            echo "lastResPath=(${lastResPath[@]})" > $lastPath
+            afterRun
             mutt -e "set content_type=text/html" -s "$mailTitle" ${mailList[@]} < ${workDir}/${resDir}/cmp.html
         fi
-    elif [ -n "$1" ] && [ "$1" = "--rerun" ]; then
-        cd $workDir
-        today=$(date +%Y_%m_%d)
-        i=0
-        while [ -d ${today}_$i ]; do (( i++ )); done
-        resDir=${today}_$i
-        mkdir $resDir && cd $resDir
-        exec 3>/dev/null
+    elif [ "${runType}" = "rerun" ]; then
+	beforeRun
         exec 3>&1
-        fail="false"
-        sourceEnv
         if [ "$?" -ne 0 ]; then fail="true"; fi
         [ $fail = "false" ] && runTask
         if [ "$?" -ne 0 ]; then fail="true"; fi
         if [ $fail = "true" ]; then
             exit 1
         else
-            lastPath=${workDir}/last_test_info
-            [ -f $lastPath ] && . $lastPath
-            todayPath=${workDir}/${resDir}/testres_${today}
-            if [ ${#lastResPath[@]} -gt 0 ]; then
-                python ${workDir}/analyze.py ${lastResPath[@]} $todayPath ${workDir}/${resDir}/cmp.html
-            else
-                python ${workDir}/analyze.py $todayPath $todayPath ${workDir}/${resDir}/cmp.html
-            fi
-            lastResPath+=($todayPath)
-            if [ ${#lastResPath[@]} -gt 3 ]; then
-                lastResPath=("${lastResPath[@]/${lastResPath[0]}}")
-            fi
-            echo "lastResPath=(${lastResPath[@]})" > $lastPath
+            afterRun
         fi
     else
-        exec 3>/dev/null
         exec 3>&1
         # crontab only edited by root
         [ `id -u` -eq 0 ] && checkCrontab
         sourceEnv
-        if [ -n "$1" ] && [ "$1" = "-g" ]; then genData; fi
+        if [ "${runType}" = "gen" ]; then genData; fi
     fi
 }
 
-if [ -n "$1" ]; then
-    main $1;
+if [ -n "$*" ]; then
+    main $*;
 else
     main
 fi
