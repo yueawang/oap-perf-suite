@@ -25,6 +25,8 @@ import org.apache.spark.internal.Logging
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
+import sys.process._
+
 abstract class OapTestSuite extends BenchmarkConfigSelector with OapPerfSuiteContext with Logging {
 
   // Class information
@@ -58,6 +60,7 @@ abstract class OapTestSuite extends BenchmarkConfigSelector with OapPerfSuiteCon
   def run(test: OapBenchmarkTest, repCount: Int): Unit = {
     logWarning(s"running ${test.name} ($repCount times) ...")
     val result = (1 to repCount).map{ _ =>
+      dropCache()
       TestUtil.queryTime(spark.sql(test.sql).foreach{ _ => })
     }.toArray
 
@@ -114,6 +117,23 @@ abstract class OapTestSuite extends BenchmarkConfigSelector with OapPerfSuiteCon
 
   protected def testSet: Seq[OapBenchmarkTest]
 
+  private var _executorHosts: Seq[String] = _
+  private def getExecutorHosts(): Unit = {
+    val ids = spark.sparkContext.getExecutorIds()
+    _executorHosts = ids.flatMap { id =>
+      val executorEndpoint = spark.sparkContext.env.blockManager
+        .master.getExecutorEndpointRef(id).orNull
+      if (executorEndpoint == null) Seq() else Seq(executorEndpoint.address.host)
+    }
+  }
+
+  protected def dropCache: Unit = {
+    if (_executorHosts == null) getExecutorHosts()
+    _executorHosts.foreach { node =>
+      val dropCacheResult = Seq("bash", "-c", s"""ssh $node "echo 3 > /proc/sys/vm/drop_caches"""").!
+      assert(dropCacheResult == 0)
+    }
+  }
 }
 
 object BenchmarkSuiteSelector extends Logging{
