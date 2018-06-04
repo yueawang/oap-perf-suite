@@ -116,6 +116,13 @@ abstract class OapTestSuite extends BenchmarkConfigSelector with OapPerfSuiteCon
   def resultMap = _resultMap
 
   protected def testSet: Seq[OapBenchmarkTest]
+  protected def dropCache(): Unit = {
+    val nodes = spark.sparkContext.getExecutorMemoryStatus.map(_._1.split(":")(0))
+    nodes.foreach { node =>
+      val dropCacheResult = Seq("bash", "-c", s"""ssh $node "echo 3 > /proc/sys/vm/drop_caches"""").!
+      assert(dropCacheResult == 0)
+    }
+  }
 
   private var _executorHosts: Seq[String] = _
   private def getExecutorHosts(): Unit = {
